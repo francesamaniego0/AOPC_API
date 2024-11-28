@@ -412,5 +412,35 @@ namespace API.Data.Controller
 
             return Ok(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CorporateUserCountAll()
+        {
+            string sql = $@"select Corp.CorporateName,Coalesce(Reg.RegCount,0) 'Registered',Coalesce(UnReg.UnRegCount,0) 'Unregistered',Coalesce(VIP.VipCount,0) 'Registered VIP',Coalesce(TotVIP.Count,0) 'Total VIP Count',Coalesce(TotVIP.Count,0) - Coalesce(VIP.VipCount,0) 'Remaining VIP',TotVIP.Count 'User Count' ,Coalesce(Reg.RegCount,0)  + Coalesce(VIP.VipCount,0) 'Total User' from (select Id, CorporateName from tbl_CorporateModel group by Id,CorporateName)As Corp
+            left join (select CorporateID,Count(*) 'RegCount' from UsersModel where Active = '1' and isVIP = 0 group by CorporateID)Reg on Corp.Id = Reg.CorporateID
+            left join (select CorporateID,Count(*) 'UnRegCount' from UsersModel where Active = '6' group by CorporateID)UnReg on Corp.Id = UnReg.CorporateID
+            left join (select CorporateID,Count(*) 'VipCount' from UsersModel where Active = '1' and isVIP = 1 group by CorporateID)VIP on Corp.Id = VIP.CorporateID
+            left join (select Id,Coalesce(VipCount,0) 'Count',Count 'UserCount' from tbl_CorporateModel)TotVIP on Corp.Id = TotVIP.Id";
+            var result = new List<CorporateUserCountVM>();
+            DataTable table = db.SelectDb(sql).Tables[0];
+
+
+            foreach (DataRow dr in table.Rows)
+            {
+                var item = new CorporateUserCountVM();
+                item.CorporateName = dr["CorporateName"].ToString();
+                item.Registered = dr["Registered"].ToString();
+                item.Unregistered = dr["Unregistered"].ToString();
+                item.RegisteredVIP = dr["Registered VIP"].ToString();
+                item.TotalVIP = dr["Total VIP Count"].ToString();
+                item.RemainingVip = dr["Remaining Vip"].ToString();
+                item.UserCount = dr["User Count"].ToString();
+                item.TotalUser = dr["Total User"].ToString();
+                result.Add(item);
+            }
+
+            return Ok(result);
+        }
+
     }
 }

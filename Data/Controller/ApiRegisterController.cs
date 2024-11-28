@@ -103,54 +103,125 @@ namespace AuthSystem.Data.Controller
 
             return Ok(item);
         }
+        //[HttpPost]
+        //public async Task<IActionResult> Corporatelist(paginateCorpUserv2 data)
+        //{
+        //    string status = "ACTIVE";
+        //    int pageSize = 10;
+        //    //var model_result = (dynamic)null;
+        //    var items = (dynamic)null;
+        //    int totalItems = 0;
+        //    int totalVIP = 0;
+        //    int totalPages = 0;
+        //    string page_size = pageSize == 0 ? "10" : pageSize.ToString();
+        //    try
+        //    {
+
+        //        var Member = dbmet.GetCorporateList(data).ToList();
+        //        totalItems = Member.Count;
+        //        totalPages = (int)Math.Ceiling((double)totalItems / int.Parse(page_size.ToString()));
+        //        items = Member.Skip((data.page - 1) * int.Parse(page_size.ToString())).Take(int.Parse(page_size.ToString())).ToList();
+
+
+
+        //        var result = new List<PaginationCorpUserModel>();
+        //        var item = new PaginationCorpUserModel();
+        //        int pages = data.page == 0 ? 1 : data.page;
+        //        item.CurrentPage = data.page == 0 ? "1" : data.page.ToString();
+
+        //        int page_prev = pages - 1;
+        //        //int t_record = int.Parse(items.Count.ToString()) / int.Parse(page_size);
+
+        //        double t_records = Math.Ceiling(double.Parse(totalItems.ToString()) / double.Parse(page_size));
+        //        int page_next = data.page >= t_records ? 0 : pages + 1;
+        //        item.NextPage = items.Count % int.Parse(page_size) >= 0 ? page_next.ToString() : "0";
+        //        item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
+        //        item.TotalPage = t_records.ToString();
+        //        item.PageSize = page_size;
+        //        item.TotalRecord = totalItems.ToString();
+        //        item.TotalVIP = totalVIP.ToString();
+        //        item.items = items;
+        //        result.Add(item);
+        //        return Ok(result);
+
+
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest("ERROR");
+        //    }
+        //}
+
         [HttpPost]
         public async Task<IActionResult> Corporatelist(paginateCorpUserv2 data)
         {
-            string status = "ACTIVE";
-            int pageSize = 10;
-            //var model_result = (dynamic)null;
-            var items = (dynamic)null;
-            int totalItems = 0;
-            int totalVIP = 0;
-            int totalPages = 0;
-            string page_size = pageSize == 0 ? "10" : pageSize.ToString();
-            try
+            GlobalVariables gv = new GlobalVariables();
+            string sql = $@"SELECT        UsersModel.Username, UsersModel.Fname, UsersModel.Lname, UsersModel.Email, UsersModel.Gender, UsersModel.EmployeeID, tbl_PositionModel.Name AS Position, tbl_CorporateModel.CorporateName, 
+                 tbl_UserTypeModel.UserType, UsersModel.Fullname, UsersModel.Id, UsersModel.DateCreated, tbl_PositionModel.Id AS PositionID, tbl_CorporateModel.Id AS CorporateID, tbl_StatusModel.Name AS status, UsersModel.isVIP, 
+                 UsersModel.FilePath
+                FROM            UsersModel INNER JOIN
+                tbl_CorporateModel ON UsersModel.CorporateID = tbl_CorporateModel.Id LEFT OUTER JOIN
+                tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id LEFT OUTER JOIN
+                tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id LEFT OUTER JOIN
+                tbl_StatusModel ON UsersModel.Active = tbl_StatusModel.Id
+                WHERE        (UsersModel.Active IN (1, 2, 9, 10)) AND (UsersModel.Type = 2)";
+
+                //order by UsersModel.Id Desc";
+                if (data.CorpId != null)
+                {
+                    sql += " AND CorporateID = " + data.CorpId;
+                }
+                if (data.PosId != null)
+                {
+                    sql += " AND tbl_PositionModel.Id = " + data.PosId;
+                }
+                if (data.Gender != null)
+                {
+                    sql += " AND UsersModel.Gender = '" + data.Gender + "'";
+                }
+                if (data.isVIP != null)
+                {
+                    sql += " AND UsersModel.isVIP = " + data.isVIP;
+                }
+                if (data.Status != null)
+                {
+                    sql += " AND tbl_StatusModel.Name = '" + data.Status + "'";
+                }
+                if (data.FilterName != null)
+                {
+                    sql += " AND (UsersModel.Fname like '%" + data.FilterName + "%' or UsersModel.Lname like '%" + data.FilterName + "%' or tbl_CorporateModel.CorporateName like '%" + data.FilterName + "%')";
+                }
+                sql += " order by UsersModel.Id desc";
+
+            var result = new List<UserVM>();
+            DataTable table = db.SelectDb(sql).Tables[0];
+
+            foreach (DataRow dr in table.Rows)
             {
-
-                var Member = dbmet.GetCorporateList(data).ToList();
-                totalItems = Member.Count;
-                totalPages = (int)Math.Ceiling((double)totalItems / int.Parse(page_size.ToString()));
-                items = Member.Skip((data.page - 1) * int.Parse(page_size.ToString())).Take(int.Parse(page_size.ToString())).ToList();
-
-
-
-                var result = new List<PaginationCorpUserModel>();
-                var item = new PaginationCorpUserModel();
-                int pages = data.page == 0 ? 1 : data.page;
-                item.CurrentPage = data.page == 0 ? "1" : data.page.ToString();
-
-                int page_prev = pages - 1;
-                //int t_record = int.Parse(items.Count.ToString()) / int.Parse(page_size);
-
-                double t_records = Math.Ceiling(double.Parse(totalItems.ToString()) / double.Parse(page_size));
-                int page_next = data.page >= t_records ? 0 : pages + 1;
-                item.NextPage = items.Count % int.Parse(page_size) >= 0 ? page_next.ToString() : "0";
-                item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
-                item.TotalPage = t_records.ToString();
-                item.PageSize = page_size;
-                item.TotalRecord = totalItems.ToString();
-                item.TotalVIP = totalVIP.ToString();
-                item.items = items;
+                var item = new UserVM();
+                item.Id = int.Parse(dr["id"].ToString());
+                item.Fullname = dr["Fname"].ToString() + " " + dr["Lname"].ToString();
+                item.Username = dr["Username"].ToString();
+                item.Fname = dr["Fname"].ToString();
+                item.Lname = dr["Lname"].ToString();
+                item.Email = dr["Email"].ToString();
+                item.Gender = dr["Gender"].ToString();
+                item.EmployeeID = dr["EmployeeID"].ToString();
+                item.Position = dr["Position"].ToString();
+                item.Corporatename = dr["Corporatename"].ToString();
+                item.UserType = dr["UserType"].ToString();
+                item.DateCreated = Convert.ToDateTime(dr["DateCreated"].ToString()).ToString("MM/dd/yyyy");
+                item.CorporateID = dr["CorporateID"].ToString();
+                item.PositionID = dr["PositionID"].ToString();
+                item.status = dr["status"].ToString();
+                item.FilePath = dr["FilePath"].ToString();
+                item.FilePath = dr["FilePath"].ToString();
+                item.isVIP = dr["isVIP"].ToString();
                 result.Add(item);
-                return Ok(result);
-
-
             }
 
-            catch (Exception ex)
-            {
-                return BadRequest("ERROR");
-            }
+            return Ok(result);
         }
         [HttpGet]
         public async Task<IActionResult> UserAllist()
