@@ -375,12 +375,12 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
    
             string sql = $@"SELECT        UsersModel.Username, UsersModel.Fname, UsersModel.Lname, UsersModel.Email, UsersModel.Gender, UsersModel.EmployeeID, tbl_PositionModel.Name AS Position, tbl_CorporateModel.CorporateName, 
                          tbl_UserTypeModel.UserType, UsersModel.Fullname, UsersModel.Id, UsersModel.DateCreated, tbl_PositionModel.Id AS PositionID, tbl_CorporateModel.Id AS CorporateID, tbl_StatusModel.Name AS status, UsersModel.isVIP,    UsersModel.FilePath
-FROM            UsersModel INNER JOIN
-                         tbl_CorporateModel ON UsersModel.CorporateID = tbl_CorporateModel.Id INNER JOIN
-                         tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id INNER JOIN
-                         tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id INNER JOIN
-                         tbl_StatusModel ON UsersModel.Active = tbl_StatusModel.Id
-WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.Id desc";
+                        FROM            UsersModel INNER JOIN
+                                                 tbl_CorporateModel ON UsersModel.CorporateID = tbl_CorporateModel.Id INNER JOIN
+                                                 tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id INNER JOIN
+                                                 tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id INNER JOIN
+                                                 tbl_StatusModel ON UsersModel.Active = tbl_StatusModel.Id
+                        WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.Id desc";
             var result = new List<UserVM>();
             DataTable table = db.SelectDb(sql).Tables[0];
 
@@ -1366,14 +1366,18 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.
             }
         }
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<FamilyMemberpagedModel>>> ListFamilyMember(FamMemberRequest searchFilter)
+       // public async Task<ActionResult<IEnumerable<FamilyMemberModel>>> ListFamilyMember(FamMemberRequest searchFilter)
+        public async Task<ActionResult<IEnumerable<FamilyMemberModel>>> ListFamilyMember(FamMemberRequest searchFilter)
+            
         {
 
             try
             {
                 List<FamilyMemberModel> famMemberList = await buildFamMemberSearchQuery(searchFilter).ToListAsync();
-                var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
-                return Ok(result);
+                //var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
+                //var result = List<FamilyMemberModel>();
+
+                return Ok(famMemberList);
             }
             catch (Exception ex)
             {
@@ -1384,8 +1388,8 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.
         public class FamMemberRequest
         {
             public int FamilyUserId { get; set; }
-            public int page { get; set; }
-            public int pageSize { get; set; }
+            //public int page { get; set; }
+            //public int pageSize { get; set; }
         }
         private IQueryable<FamilyMemberModel> buildFamMemberSearchQuery(FamMemberRequest searchFilter)
         {
@@ -1396,37 +1400,37 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.
             return query;
         }
 
-        private List<FamilyMemberpagedModel> buildBirthTypesPagedModel(FamMemberRequest searchFilter, List<FamilyMemberModel> FamMember)
-        {
-            int pagesize = searchFilter.pageSize == 0 ? 10 : searchFilter.pageSize;
-            int page = searchFilter.page == 0 ? 1 : searchFilter.page;
-            var items = (dynamic)null;
-            int totalItems = 0;
-            int totalPages = 0;
+        //private List<FamilyMemberpagedModel> buildBirthTypesPagedModel(FamMemberRequest searchFilter, List<FamilyMemberModel> FamMember)
+        //{
+            //int pagesize = searchFilter.pageSize == 0 ? 10 : searchFilter.pageSize;
+            //int page = searchFilter.page == 0 ? 1 : searchFilter.page;
+            //var items = (dynamic)null;
+            //int totalItems = 0;
+            //int totalPages = 0;
 
-            totalItems = FamMember.Count;
-            totalPages = (int)Math.Ceiling((double)totalItems / pagesize);
-            items = FamMember.Skip((page - 1) * pagesize).Take(pagesize).ToList();
+            //totalItems = FamMember.Count;
+            //totalPages = (int)Math.Ceiling((double)totalItems / pagesize);
+            //items = FamMember.Skip((page - 1) * pagesize).Take(pagesize).ToList();
 
-            var result = new List<FamilyMemberpagedModel>();
-            var item = new FamilyMemberpagedModel();
+            //var result = new List<FamilyMemberpagedModel>();
+            //var item = new FamilyMemberpagedModel();
 
-            int pages = searchFilter.page == 0 ? 1 : searchFilter.page;
-            item.CurrentPage = searchFilter.page == 0 ? "1" : searchFilter.page.ToString();
-            int page_prev = pages - 1;
+            //int pages = searchFilter.page == 0 ? 1 : searchFilter.page;
+            //item.CurrentPage = searchFilter.page == 0 ? "1" : searchFilter.page.ToString();
+            //int page_prev = pages - 1;
 
-            double t_records = Math.Ceiling(Convert.ToDouble(totalItems) / Convert.ToDouble(pagesize));
-            int page_next = searchFilter.page >= t_records ? 0 : pages + 1;
-            item.NextPage = items.Count % pagesize >= 0 ? page_next.ToString() : "0";
-            item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
-            item.TotalPage = t_records.ToString();
-            item.PageSize = pagesize.ToString();
-            item.TotalRecord = totalItems.ToString();
-            item.data = FamMember;
-            result.Add(item);
+            //double t_records = Math.Ceiling(Convert.ToDouble(totalItems) / Convert.ToDouble(pagesize));
+            //int page_next = searchFilter.page >= t_records ? 0 : pages + 1;
+            //item.NextPage = items.Count % pagesize >= 0 ? page_next.ToString() : "0";
+            //item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
+            //item.TotalPage = t_records.ToString();
+            //item.PageSize = pagesize.ToString();
+            //item.TotalRecord = totalItems.ToString();
+        //    item.data = FamMember;
+        //    result.Add(item);
 
-            return result;
-        }
+        //    return result;
+        //}
         [HttpPost]
         public async Task<IActionResult> deleteFamilyMember(DeletionModel deletionModel)
         {
@@ -1497,7 +1501,41 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) and Type=1 order by UsersModel.
                 return Problem(ex.GetBaseException().ToString());
             }
         }
+        public class FamilyMemberStatus
+        {
 
+            public int Id { get; set; }
+            public string Status { get; set; }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> updateFamilyMemberStatus(FamilyMemberStatus data)
+        {
+
+            string sql = $@"select * from tbl_familymember where Id='" + data.Id + "'";
+            DataTable dt = db.SelectDb(sql).Tables[0];
+            var result = new FamilyMemberStatus();
+            if (dt.Rows.Count > 0)
+            {
+                string query = $@"update tbl_familymember set ApplicationStatus = '" + data.Status + "' where Id ='" + data.Id + "'";
+
+                db.AUIDB_WithParam(query);
+                result.Status = "Successfully Updated";
+                return Ok(result);
+
+            }
+            else
+            {
+                result.Status = "Error";
+
+                return BadRequest(result);
+
+            }
+
+
+            return Ok(result);
+        }
         public class DeletionModel
         {
             public int id { get; set; }

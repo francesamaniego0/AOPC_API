@@ -632,10 +632,11 @@ namespace AuthSystem.Data.Controller
                 item.VIPCard = table.Rows[0]["VIPCard"].ToString();
                 item.QRFrame = table.Rows[0]["QRFrame"].ToString();
                 item.VIPBadge = table.Rows[0]["VIPBadge"].ToString();
+                item.TextColor = table.Rows[0]["TextColor"].ToString();
 
 
 
-           
+
 
             }
             return Ok(item);

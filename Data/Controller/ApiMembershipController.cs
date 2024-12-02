@@ -182,7 +182,7 @@ namespace AuthSystem.Data.Controller
         {
             string sql = $@"SELECT        tbl_MembershipModel.Id, tbl_MembershipModel.Name AS MembershipName, tbl_MembershipModel.Description, tbl_MembershipModel.DateUsed AS DateStarted, tbl_MembershipModel.DateEnded, 
                          tbl_MembershipModel.DateCreated, tbl_MembershipModel.MembershipID, tbl_StatusModel.Name AS Status, tbl_MembershipModel.UserCount, tbl_MembershipModel.VIPCount, tbl_MembershipModel.MembershipCard, 
-                         tbl_MembershipModel.VIPCard, tbl_MembershipModel.QRFrame, tbl_MembershipModel.VIPBadge
+                         tbl_MembershipModel.VIPCard, tbl_MembershipModel.QRFrame, tbl_MembershipModel.VIPBadge, tbl_MembershipModel.TextColor
 FROM            tbl_MembershipModel INNER JOIN
                          tbl_StatusModel ON tbl_MembershipModel.Status = tbl_StatusModel.Id
 WHERE        (tbl_MembershipModel.Status = 5)
@@ -245,7 +245,7 @@ ORDER BY tbl_MembershipModel.Id DESC";
                     item.VIPBadge = vipbadge_path;
                     item.VIPCard = vipcard_path;
                     item.QRFrame = qrframe_path;
-
+                    item.textCardColor = dr["TextColor"].ToString();
                     result.Add(item);
                 }
                 
@@ -398,6 +398,7 @@ ORDER BY tbl_MembershipModel.Id DESC";
             {
                 vipbadge_path = "https://www.alfardanoysterprivilegeclub.com/assets/img/VIPBadge/" + data.VIPBadge.Replace(" ", "%20");
             }
+            Console.Write(dt.Rows.Count + " Test1");
             if (dt.Rows.Count == 0)
             {
                 sql = $@"select * from tbl_MembershipModel where Name ='" + data.MembershipName + "'  and Status=5";
@@ -407,7 +408,7 @@ ORDER BY tbl_MembershipModel.Id DESC";
 
 
            
-                    string Insert = $@"insert into tbl_MembershipModel (Name,Description,DateUsed,DateEnded,UserCount,VIPCount,MembershipCard,VIPCard,QRFrame,VIPBadge,Status) values 
+                    string Insert = $@"insert into tbl_MembershipModel (Name,Description,DateUsed,DateEnded,UserCount,VIPCount,MembershipCard,VIPCard,QRFrame,VIPBadge,Status,TextColor) values 
                                    ('" + data.MembershipName + "'," +
                                    "'" + data.Description + "'," +
                                    "'" + data.DateStarted + "'," +
@@ -418,7 +419,8 @@ ORDER BY tbl_MembershipModel.Id DESC";
                                    "'" + vipcard_path + "'," +
                                    "'" + qrframe_path + "'," +
                                    "'" + vipbadge_path + "'," +
-                                   "5) ";
+                                   "5,"+
+                                   "'"+data.textCardColor+"') ";
                     db.AUIDB_WithParam(Insert);
                     result.Status = "Successfully Added";
 
@@ -437,7 +439,8 @@ ORDER BY tbl_MembershipModel.Id DESC";
             else
             {
 
-              
+                
+
                 string Update = $@"update tbl_MembershipModel
                                 set Name='" + data.MembershipName + "', " +
                                 "Description='" + data.Description + "' , " +
@@ -446,8 +449,9 @@ ORDER BY tbl_MembershipModel.Id DESC";
                                 "VIPCard='" + vipcard_path + "', " +
                                 "QRFrame='" + qrframe_path + "', " +
                                 "VIPBadge='" + vipbadge_path + "', " +
-                                "DateEnded='" + data.DateEnded +
-                                "', UserCount='" + data.UserCount + "', " +
+                                "DateEnded='" + data.DateEnded +"'," +
+                                "UserCount='" + data.UserCount + "',"  +
+                                "TextColor ='" + data.textCardColor + "', " +
                                 "VIPCount='" + data.VIPCount + "' " +
                                 "where id='"+data.Id+"'";
                 db.AUIDB_WithParam(Update);

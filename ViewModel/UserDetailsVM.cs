@@ -43,6 +43,7 @@ namespace AuthSystem.ViewModel
         public string? VIPCard { get; set; }
         public string? QRFrame { get; set; }
         public string? VIPBadge { get; set; }
+        public string? TextColor { get; set; }
 
     }
 }

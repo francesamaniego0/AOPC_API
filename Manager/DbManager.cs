@@ -46,7 +46,7 @@ namespace AuthSystem.Manager
          //   cnnstr = "Data Source=localhost;Initial Catalog=AOPCDB;User ID=sa;Password=reallyStrongPwd123";
           //cnnstr = "Data Source=DESKTOP-9P0BJ07;Initial Catalog=AOPCDB;User ID=test;Password=1234";
             // cnnstr = "Data Source=LERJUN-PC;Initial Catalog=AOPCDB_DEV;User ID=test;Password=1234";
-            cnnstr = "Data Source=LAPTOP-3191GBJB\\SQLEXPRESS;Initial Catalog=AOPCDB;User ID=test;Password=1234"; // France
+            cnnstr = "Data Source=LAPTOP-3191GBJB\\SQLEXPRESS;Initial Catalog=AOPCDB;User ID=test;Password=1234;"; // France
             conn = new SqlConnection(cnnstr);
         }
         public DataSet SelectDb(string value)

@@ -245,48 +245,49 @@ ORDER BY tbl_PrivilegeModel.Id DESC";
                 //    string newString = tmc.Substring(0, tmc.Length - 1);
 
                 //}
-                int ctr = 0;
-                var res = "";
-                var ress = "";
+                //int ctr = 0;
+                //var res = "";
+                //var ress = "";
        
-                var gal = dr["TMC"].ToString();
-                var mec = dr["Mechanics"].ToString();
-                string[] gallist = gal.Split("^");
-                string[] meclist = mec.Split("^");
-                foreach (string author in gallist)
-                {
+                //var gal = dr["TMC"].ToString();
+                //var mec = dr["Mechanics"].ToString();
+                //string[] gallist = gal.Split("^");
+                //string[] meclist = mec.Split("^");
+                //foreach (string author in gallist)
+                //{
              
-                    if (author != ""  && author != "||")
-                    {
+                //    if (author != ""  && author != "||")
+                //    {
 
-                        res += author.Replace("||","") +"^";
+                //        res += author.Replace("||","");
                      
-                        ctr++;
+                //        ctr++;
 
-                    }
+                //    }
 
-                }
-                foreach (string mechanics in meclist)
-                {
+                //}
+                //foreach (string mechanics in meclist)
+                //{
 
-                    if (mechanics != "")
-                    {
+                //    if (mechanics != "")
+                //    {
 
-                        ress += mechanics.Replace("||", "") + "^";
+                //        ress += mechanics.Replace("||", "");
 
-                        ctr++;
+                //        ctr++;
 
-                    }
+                //    }
 
-                }
+                //}
+                var tmc = dr["PrivilegeID"].ToString();
                 item.Title = dr["Title"].ToString();
                 item.ImgUrl = dr["ImgUrl"].ToString();
                 item.VendorID = dr["VendorID"].ToString();
                 item.PrivilegeID = dr["PrivilegeID"].ToString();
-                item.Mechanics = ress;
+                item.Mechanics = dr["Mechanics"].ToString();
                 item.BusinessTypeName = dr["BusinessTypeName"].ToString();
                 item.Description = dr["Description"].ToString();
-                item.TMC = res;
+                item.TMC = dr["TMC"].ToString();
                 item.VendorName = dr["VendorName"].ToString();
                 item.Validity = Convert.ToDateTime(dr["Validity"].ToString()).ToString("MM/dd/yyyy");
 
@@ -316,7 +317,7 @@ ORDER BY tbl_PrivilegeModel.Id DESC";
                     imgfile = "https://www.alfardanoysterprivilegeclub.com/assets/img/" +data.ImgUrl.Replace(" ", "%20");
                 }
                 string OTPInsert = $@"insert into tbl_PrivilegeModel (Title,Description,Mechanics,Validity,NoExpiry,ImgUrl,VendorID,isVIP,BusinessTypeID,TMC,Active) values 
-                                     ('"+data.Title.Replace("'","''")+"','"+data.Description+"','"+data.Mechanics.Replace("'", "''") + "','"+data.Validity + "','"+data.noExpiry + "','"+ imgfile + "','"+data.VendorID + "','"+data.isVIP + "','"+data.BusinessTypeID + "','"+data.TMC.Replace("'", "''") + "','"+data.Active+"')";
+                                     ('"+data.Title.Replace("'","''")+"','"+data.Description+"',N'"+data.Mechanics.Replace("'", "''") + "','"+data.Validity + "','"+data.noExpiry + "','"+ imgfile + "','"+data.VendorID + "','"+data.isVIP + "','"+data.BusinessTypeID + "',N'"+data.TMC.Replace("'", "''") + "','"+data.Active+"')";
                 db.AUIDB_WithParam(OTPInsert);
                 result.Status = "Successfully Added";
 
@@ -334,9 +335,10 @@ ORDER BY tbl_PrivilegeModel.Id DESC";
                 {
                     imgfile = "https://www.alfardanoysterprivilegeclub.com/assets/img/" + data.ImgUrl.Replace(" ", "%20");
                 }
-                string OTPInsert = $@"update tbl_PrivilegeModel set Title='"+data.Title.Replace("'", "''") + "', Description='"+data.Description+"' , Mechanics='"+data.Mechanics.Replace("'", "''") + "', Validity='"+data.Validity+"', NoExpiry='"+data.noExpiry+"', ImgUrl='"+ imgfile + "', " +
-                    "VendorID='"+data.VendorID+"', isVIP='"+data.isVIP+"', BusinessTypeID='"+data.BusinessTypeID+"', TMC='"+data.TMC.Replace("'", "''") + "' where id =" + data.Id + "";
+                string OTPInsert = $@"update tbl_PrivilegeModel set Title='"+data.Title.Replace("'", "''") + "', Description='"+data.Description+"' , Mechanics=N'"+data.Mechanics.Replace("'", "''") + "', Validity='"+data.Validity+"', NoExpiry='"+data.noExpiry+"', ImgUrl='"+ imgfile + "', " +
+                    "VendorID='"+data.VendorID+"', isVIP='"+data.isVIP+"', BusinessTypeID='"+data.BusinessTypeID+"', TMC=N'"+data.TMC.Replace("'", "''") + "' where id =" + data.Id + "";
                 db.AUIDB_WithParam(OTPInsert);
+
                 result.Status = "Successfully Updated";
 
                 return Ok(result);
