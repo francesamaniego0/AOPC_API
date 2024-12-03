@@ -219,17 +219,20 @@ namespace API.Data.Controller
             }
             else
             {
-                sql = $@"select Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '6' and  Concat (Fname + ' ',Lname) like '%" + data.name + "%'";
+                sql = $@"select Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '6' and  CorporateId = '" + data.name + "'";
             }
             DataTable dt = db.SelectDb(sql).Tables[0];
             var result = new List<UnregisteredResult>();
+            var item = new UnregisteredResult();
             foreach (DataRow dr in dt.Rows)
             {
-                var item = new UnregisteredResult();
+                
                 item.Name = dr["Name"].ToString();
                 item.Email = dr["Email"].ToString();
+                item.Count = dt.Rows.Count;
                 result.Add(item);
             }
+
             
             return Ok(result);
         }
@@ -260,6 +263,8 @@ namespace API.Data.Controller
         {
             public string Name { get; set; }
             public string Email { get; set; }
+
+            public int Count { get; set; }
         }
 
         public class UnregisteredUserEmailRequest
