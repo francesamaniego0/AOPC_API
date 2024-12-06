@@ -1413,17 +1413,46 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
         }
         [HttpPost]
        // public async Task<ActionResult<IEnumerable<FamilyMemberModel>>> ListFamilyMember(FamMemberRequest searchFilter)
-        public async Task<ActionResult<IEnumerable<FamilyMemberModel>>> ListFamilyMember(FamMemberRequest searchFilter)
-            
+        public async Task<ActionResult<IEnumerable<FamilyMemberModel>>> ListFamilyMemberV2(FamMemberRequestV2 searchFilter) 
+        {
+            try
+            {
+                List<FamilyMemberModel> famMemberList = await buildFamMemberSearchQueryV2(searchFilter).ToListAsync();
+                //var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
+                //var result = List<FamilyMemberModel>();
+                return Ok(famMemberList);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.GetBaseException().ToString());
+            }
+        }
+        public class FamMemberRequestV2
+        {
+            public int FamilyUserId { get; set; }
+            //public int page { get; set; }
+            //public int pageSize { get; set; }
+        }
+        private IQueryable<FamilyMemberModel> buildFamMemberSearchQueryV2(FamMemberRequestV2 searchFilter)
+        {
+            IQueryable<FamilyMemberModel> query = _context.tbl_FamilyMember.Where(fam => fam.Status == 1);
+            if (searchFilter.FamilyUserId != 0)
+                query = query.Where(fam => fam.FamilyUserId.Equals(searchFilter.FamilyUserId));
+
+            return query;
+        }
+
+
+
+        [HttpPost]
+        public async Task<ActionResult<IEnumerable<FamilyMemberpagedModel>>> ListFamilyMember(FamMemberRequest searchFilter)
         {
 
             try
             {
                 List<FamilyMemberModel> famMemberList = await buildFamMemberSearchQuery(searchFilter).ToListAsync();
-                //var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
-                //var result = List<FamilyMemberModel>();
-
-                return Ok(famMemberList);
+                var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -1433,45 +1462,80 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
 
         public class FamMemberRequest
         {
-            public int FamilyUserId { get; set; }
-            //public int page { get; set; }
-            //public int pageSize { get; set; }
+            public int id { get; set; }
+            public int page { get; set; }
+            public int pageSize { get; set; }
         }
         private IQueryable<FamilyMemberModel> buildFamMemberSearchQuery(FamMemberRequest searchFilter)
         {
+            //Sir CJ
             IQueryable<FamilyMemberModel> query = _context.tbl_FamilyMember.Where(fam => fam.Status == 1);
-            if (searchFilter.FamilyUserId != 0)
-                query = query.Where(fam => fam.FamilyUserId.Equals(searchFilter.FamilyUserId));
+            //France Simple Adjusment (Remove Status filter)
+            //IQueryable<FamilyMemberModel> query = _context.tbl_FamilyMember;
+            if (searchFilter.id != 0)
+                query = query.Where(fam => fam.FamilyUserId.Equals(searchFilter.id));
 
             return query;
         }
 
+        private List<FamilyMemberpagedModel> buildBirthTypesPagedModel(FamMemberRequest searchFilter, List<FamilyMemberModel> FamMember)
+        {
+            int pagesize = searchFilter.pageSize == 0 ? 10 : searchFilter.pageSize;
+            int page = searchFilter.page == 0 ? 1 : searchFilter.page;
+            var items = (dynamic)null;
+            int totalItems = 0;
+            int totalPages = 0;
+
+            totalItems = FamMember.Count;
+            totalPages = (int)Math.Ceiling((double)totalItems / pagesize);
+            items = FamMember.Skip((page - 1) * pagesize).Take(pagesize).ToList();
+
+            var result = new List<FamilyMemberpagedModel>();
+            var item = new FamilyMemberpagedModel();
+
+            int pages = searchFilter.page == 0 ? 1 : searchFilter.page;
+            item.CurrentPage = searchFilter.page == 0 ? "1" : searchFilter.page.ToString();
+            int page_prev = pages - 1;
+
+            double t_records = Math.Ceiling(Convert.ToDouble(totalItems) / Convert.ToDouble(pagesize));
+            int page_next = searchFilter.page >= t_records ? 0 : pages + 1;
+            item.NextPage = items.Count % pagesize >= 0 ? page_next.ToString() : "0";
+            item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
+            item.TotalPage = t_records.ToString();
+            item.PageSize = pagesize.ToString();
+            item.TotalRecord = totalItems.ToString();
+            item.data = FamMember;
+            result.Add(item);
+
+            return result;
+        }
+
         //private List<FamilyMemberpagedModel> buildBirthTypesPagedModel(FamMemberRequest searchFilter, List<FamilyMemberModel> FamMember)
         //{
-            //int pagesize = searchFilter.pageSize == 0 ? 10 : searchFilter.pageSize;
-            //int page = searchFilter.page == 0 ? 1 : searchFilter.page;
-            //var items = (dynamic)null;
-            //int totalItems = 0;
-            //int totalPages = 0;
+        //int pagesize = searchFilter.pageSize == 0 ? 10 : searchFilter.pageSize;
+        //int page = searchFilter.page == 0 ? 1 : searchFilter.page;
+        //var items = (dynamic)null;
+        //int totalItems = 0;
+        //int totalPages = 0;
 
-            //totalItems = FamMember.Count;
-            //totalPages = (int)Math.Ceiling((double)totalItems / pagesize);
-            //items = FamMember.Skip((page - 1) * pagesize).Take(pagesize).ToList();
+        //totalItems = FamMember.Count;
+        //totalPages = (int)Math.Ceiling((double)totalItems / pagesize);
+        //items = FamMember.Skip((page - 1) * pagesize).Take(pagesize).ToList();
 
-            //var result = new List<FamilyMemberpagedModel>();
-            //var item = new FamilyMemberpagedModel();
+        //var result = new List<FamilyMemberpagedModel>();
+        //var item = new FamilyMemberpagedModel();
 
-            //int pages = searchFilter.page == 0 ? 1 : searchFilter.page;
-            //item.CurrentPage = searchFilter.page == 0 ? "1" : searchFilter.page.ToString();
-            //int page_prev = pages - 1;
+        //int pages = searchFilter.page == 0 ? 1 : searchFilter.page;
+        //item.CurrentPage = searchFilter.page == 0 ? "1" : searchFilter.page.ToString();
+        //int page_prev = pages - 1;
 
-            //double t_records = Math.Ceiling(Convert.ToDouble(totalItems) / Convert.ToDouble(pagesize));
-            //int page_next = searchFilter.page >= t_records ? 0 : pages + 1;
-            //item.NextPage = items.Count % pagesize >= 0 ? page_next.ToString() : "0";
-            //item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
-            //item.TotalPage = t_records.ToString();
-            //item.PageSize = pagesize.ToString();
-            //item.TotalRecord = totalItems.ToString();
+        //double t_records = Math.Ceiling(Convert.ToDouble(totalItems) / Convert.ToDouble(pagesize));
+        //int page_next = searchFilter.page >= t_records ? 0 : pages + 1;
+        //item.NextPage = items.Count % pagesize >= 0 ? page_next.ToString() : "0";
+        //item.PrevPage = pages == 1 ? "0" : page_prev.ToString();
+        //item.TotalPage = t_records.ToString();
+        //item.PageSize = pagesize.ToString();
+        //item.TotalRecord = totalItems.ToString();
         //    item.data = FamMember;
         //    result.Add(item);
 
