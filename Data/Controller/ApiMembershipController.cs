@@ -37,6 +37,13 @@ namespace AuthSystem.Data.Controller
             _context = context;
    
         }
+        
+        public class VenIDs
+        {
+            public string Id { get; set; }
+            public string? vid { get; set; }
+
+        }
         public class PrivVendListItem
         {
             public string? Id { get; set; }
@@ -46,13 +53,6 @@ namespace AuthSystem.Data.Controller
             public string? stats { get; set; }
 
         }
-        public class VenIDs
-        {
-            public string Id { get; set; }
-            //public string? vid { get; set; }
-
-        }
-
         [HttpPost]
         public IActionResult SaveVendorePrivilegeList(List<PrivVendListItem> IdList)
         {
@@ -73,18 +73,15 @@ namespace AuthSystem.Data.Controller
                     {
                         if (emp.stats == "1")
                         {
-
-
                             string insert = $@"insert into tbl_VendorPrivilegeTierModel (PrivilegeID,VendorID) values 
                                              ('" + emp.PrivilegeID + "','" + emp.vid + "')";
                             db.AUIDB_WithParam(insert);
-
                         }
-
                     }
                     else
                     {
 
+                        result.Status = "Successfully Added";
 
                     }
                 }
@@ -102,20 +99,51 @@ namespace AuthSystem.Data.Controller
             var stats = "";
             var isvip = "";
             var vid = "";
-            string sql2 = $@"SELECT tbl_PrivilegeModel.Id,VendorName FROM tbl_PrivilegeModel
+            string sql2 = $@"SELECT tbl_PrivilegeModel.Id,tbl_VendorModel.Id as vid ,VendorName FROM tbl_PrivilegeModel
             left join tbl_VendorModel on tbl_PrivilegeModel.BusinessTypeID = tbl_VendorModel.BusinessTypeId
             where tbl_PrivilegeModel.Active = '5' and tbl_PrivilegeModel.Id = '" + data.Id + "'";
             DataTable dt2 = db.SelectDb(sql2).Tables[0];
             foreach (DataRow dr in dt2.Rows)
             {
+                var vendorId = dr["vid"].ToString();
                 var item = new PrivVendListItem();
                 item.VendorName = dr["VendorName"].ToString();
-                item.vid = dr["Id"].ToString();
-                item.stats = "0";
+                item.vid = vendorId;
+
+                string sqls = $@"SELECT 
+	                            vp.Id,
+	                            vp.PrivilegeID,
+	                            vp.VendorID,
+	                            vm.VendorName
+                            FROM tbl_VendorPrivilegeTierModel AS vp WITH(NOLOCK)
+                            LEFT JOIN tbl_VendorModel AS vm WITH(NOLOCK)
+                            ON vm.Id = vp.Id
+                            WHERE vp.PrivilegeID = '" + data.Id + "' AND vp.VendorID ='" + vendorId + "'";
+
+
+                DataTable dts = db.SelectDb(sqls).Tables[0];
+
+                if (dts.Rows.Count != 0)
+                {
+                    item.stats = "1";
+                }
+                else
+                {
+                    item.stats = "0";
+                }
+                    
                 result.Add(item);
             }
 
-
+            string sql = $@"SELECT 
+	                            vp.Id,
+	                            vp.PrivilegeID,
+	                            vp.VendorID,
+	                            vm.VendorName
+                            FROM tbl_VendorPrivilegeTierModel AS vp WITH(NOLOCK)
+                            LEFT JOIN tbl_VendorModel AS vm WITH(NOLOCK)
+                            ON vm.Id = vp.Id
+                            WHERE vp.PrivilegeID = '" + data.Id + "' AND vp.VendorID ='" + data.vid + "'";
 
             //foreach (DataRow dr in dt2.Rows)
             //{
@@ -174,7 +202,7 @@ namespace AuthSystem.Data.Controller
             //    }
 
 
-        //}
+            //}
             return Ok(result);
         }
         [HttpGet]

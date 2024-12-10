@@ -370,6 +370,16 @@ FROM            tbl_VendorModel INNER JOIN
                     {
                         Logo = "https://www.alfardanoysterprivilegeclub.com/assets/img/" + data.VendorLogo.Replace("'", "''").Replace(" ", "%20"); ;
                     }
+                    string gallery = "";
+                    if (data.Gallery == null || data.Gallery == "")
+                    {
+                        gallery = "";
+
+                    }
+                    else
+                    {
+                        gallery = data.Gallery.Replace("'", "''").Replace(" ", "%20");
+                    }
                     description = data.Description.Replace("'", "''");
                     services = data.Services == null? "" : data.Services.Replace("'", "''");
                     if (data.Id == 0)
@@ -434,10 +444,38 @@ FROM            tbl_VendorModel INNER JOIN
                     }
                     else
                     {
-                         query += $@"update  tbl_VendorModel set VendorName='" + data.VendorName.Replace("'", "''") + "' , BusinessTypeId='" + data.BusinessTypeId + "' , Description='" + data.Description.Replace("'", "''") + "' , Services='" + services
-                            + "' , WebsiteUrl='" + data.WebsiteUrl + "' , FeatureImg='" + FeaturedImage + "' , Gallery='" + data.Gallery.Replace("'","''").Replace(" ","%20") + "' , Cno='" + data.Cno + "', Email='" + data.Email + "', VideoUrl='"
-                            + data.VideoUrl + "' , VrUrl='" + data.VrUrl + "'  , BusinessLocationID='" + data.BusinessLocationID + "' , Status='5' , FileUrl='" + data.FileUrl
-                            + "' , Map='" + data.Map + "' , VendorLogo='" + Logo + "' , Address='" + data.Address.Replace("'", "''") + "'  where  Id='" + data.Id + "' ";
+                         query = $@"update  tbl_VendorModel set VendorName='" + 
+                                data.VendorName.Replace("'", "''") +
+                                "' , BusinessTypeId='" +
+                                data.BusinessTypeId + 
+                                "' , Description='" +
+                                description +
+                                "' , Services='" +
+                                services + 
+                                "' , WebsiteUrl='" +
+                                data.WebsiteUrl + 
+                                "' , FeatureImg='" +
+                                FeaturedImage + 
+                                "' , Gallery='" +
+                                gallery + 
+                                "' , Cno='" + data.Cno +
+                                "', Email='" +
+                                data.Email +
+                                "', VideoUrl='"+
+                                data.VideoUrl +
+                                "' , VrUrl='" +
+                                data.VrUrl +
+                                "'  , BusinessLocationID='" +
+                                data.BusinessLocationID +
+                                "' , Status='5' , FileUrl='" +
+                                data.FileUrl+ 
+                                "' , Map='" + 
+                                data.Map + 
+                                "' , VendorLogo='" +
+                                Logo + "' , Address='" +
+                                data.Address.Replace("'", "''") + 
+                                "'  where  Id='" + 
+                                data.Id + "' ";
                         db.AUIDB_WithParam(query); 
 
                         result = "Updated Successfully";

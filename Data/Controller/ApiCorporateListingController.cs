@@ -223,10 +223,10 @@ namespace API.Data.Controller
             }
             DataTable dt = db.SelectDb(sql).Tables[0];
             var result = new List<UnregisteredResult>();
-            var item = new UnregisteredResult();
             foreach (DataRow dr in dt.Rows)
             {
-                
+
+                var item = new UnregisteredResult();
                 item.Name = dr["Name"].ToString();
                 item.Email = dr["Email"].ToString();
                 item.Count = dt.Rows.Count;
@@ -280,82 +280,272 @@ namespace API.Data.Controller
             public string Name { get; set; }
             public string Email { get; set; }
         }
+        [HttpPost]
+        public async Task<IActionResult> EmailUnregisterUserv2(UnregisteredUserEmailRequest data)
+        {
+            Console.Write(data.Name.Count());
 
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
+            //for (int x = 0; x < data.Name.Length; x++)
+            //{
+            //    message.To.Add(new MailboxAddress(data.Name[x], data.Email[x]));
+            //}
+            var recipients = data.Name.Zip(data.Email, (name, email) => new MailboxAddress(name, email)).ToList();
+
+            // Add all recipients at once
+            message.To.AddRange(recipients);
+
+            message.Subject = "Email Registration Link";
+            var bodyBuilder = new BodyBuilder();
+
+            bodyBuilder.HtmlBody = @"<style>
+                                    @font-face {font-family: 'Montserrat-Reg';src: url('/fonts/Montserrat/Montserrat-Regular.ttf');}
+                                    @font-face {
+                                    font-family: 'Montserrat-Bold';
+                                    src: url('/fonts/Montserrat/Montserrat-Bold.ttf');
+                                    }
+                                    @font-face {
+                                    font-family: 'Montserrat-SemiBold';
+                                    src: url('/fonts/Montserrat/Montserrat-SemiBold.ttf');
+                                    }
+        
+                                    body {
+                                        margin: 0;
+                                        box-sizing: border-box;
+                                        justify-content: center;
+                                        align-items: center;
+            
+                                    }
+                                    .login-container {
+                                        background-image: url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);
+                                        height: 100vh; 
+                                        width: 100vw;
+                                        display: flex;
+                                        justify-content: center;
+                                        align-items: center;
+                                        flex-direction: column; 
+                                        background-size: cover;}
+                                    .gradient-border {
+                                        height: 600px;
+                                        width: 700px; 
+                                        display: flex;
+                                        justify-content: center;
+                                        background-color: transparent;
+                                        border-width: 3px;
+                                        box-sizing: content-box;
+                                        border-style: solid;
+                                        border-image-slice: 1;
+                                        gap: 20px;
+                                        border-image-source: 
+                                            linear-gradient(
+                                                180deg,
+                                                #b07b29 17.26%,
+                                                #ebcc77 31.95%,
+                                                #b98732 53.29%,
+                                                #ecce79 74.41%,
+                                                #c69840 99.86%
+                                            );
+                                    flex-direction: column;
+                                    }
+                                    .login-container img {
+                                    margin: 20px auto;
+                                    width: 300px;
+                                    height: 110px;
+                                    }
+                                    h1 {
+                                        text-align: center;
+                                        color: #d7d2cb;
+                                        font-family: 'Montserrat-SemiBold';
+                                        font-size: 2rem;
+                                        font-style: italic;
+                                    }
+                                    h3 {
+                                        text-align: center;
+                                        color: #d7d2cb;
+                                        font-family: 'Montserrat-Reg';
+                                        font-size: 1.5rem;
+                                        font-style: italic;
+                                    }
+                                    a {
+                                        text-decoration: none;
+                                    }
+                                    h4 {
+                                        text-align: center;
+                                        color: #d7d2cb;
+                                        font-family: 'Montserrat-Reg';
+                                        font-size: 1.2rem;
+                                        font-style: italic;
+                                    }
+                                </style>
+                                <body>
+                                    <div class='login-container'>
+                                    <div class='login-logo-conctainer'>
+                                        <div class='gradient-border'>
+                                        <img src='https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC%20Logo%20-%20White.png' alt='AOPC' width='100%'' />
+
+                                        <h1>
+                                            WELCOME TO<br />ALFARDAN OYSTER <br />
+                                            PRIVILEGE CLUB
+                                        </h1>
+                                        <h3>REGISTRATION FORM</h3>
+                                        <a href='https://www.alfardanoysterprivilegeclub.com/user-registration'><h4> Click Here to Register in<br />Alfardan Oyster Privilege Club</h4></a>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </body>";
+
+
+
+            //bodyBuilder.HtmlBody = @" <style>
+            //    body {
+            //      margin: 0;
+            //      box-sizing: border-box;
+            //      display: flex;
+            //      flex-direction: column;
+            //      font-family: ""Montserrat"";
+            //    }
+            //    @font-face {
+            //      font-family: ""Montserrat"";
+            //      src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
+            //    }
+            //    .header {
+            //      width: 200px;
+            //      height: 120px;
+            //      overflow: hidden;
+            //      margin: 50px auto;
+            //    }
+            //    .body {
+            //      width: 500px;
+            //      margin: 5px auto;
+            //      font-size: 13px;
+            //    }
+            //    .body p {
+            //      margin: 20px 0;
+            //    }
+            //    ul li {
+            //      list-style: none;
+            //    }
+            //    .footer {
+            //      width: 500px;
+            //      margin: 20px auto;
+            //      font-size: 13px;
+            //    }
+            //    .citation span {
+            //      color: #c89328;
+            //    }
+            //    .body span {
+            //      color: #c89328;
+            //    }
+            //  </style>
+            //  <body>
+            //    <div class=""header"">
+            //      <img
+            //        src=""https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg""
+
+            //        alt=""Alfardan Oyster Privilege Club""
+            //        width=""100%""
+            //      />
+            //    </div>
+            //    <div class=""body"">
+            //      <p class=citation>Dear <span> Admin </span></p>
+            //      <p class=body>
+            //         " + data.Body + " </span>.</p><p class=body> " +
+            //" </div> <p class=footer>Regards, <br />" +
+            // " <br /> " +
+            // "Alfardan Oyster Privilege Club App " +
+            // "</p>" +
+            // "</body>";
+            message.Body = bodyBuilder.ToMessageBody();
+            using (var client = new SmtpClient())
+            {
+                await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync("app@alfardan.com.qa", "Oyster2023!");
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+            }
+            return Ok();
+        }
 
         [HttpPost]
         public async Task<IActionResult> EmailUnregisterUser(UnregisteredUserEmailRequest data)
         {
-            for (int x=0; x < data.Email.Length; x++)
+            Console.Write(data.Name.Count());
+            
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
+            //message.To.Add(new MailboxAddress("Ace Caspe", "ace.caspe@odecci.com"));
+            //message.To.Add(new MailboxAddress("Marito Ace", data.Email));
+            for (int x = 0; x < data.Name.Length; x++)
             {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
-                //message.To.Add(new MailboxAddress("Ace Caspe", "ace.caspe@odecci.com"));
-                //message.To.Add(new MailboxAddress("Marito Ace", data.Email));
                 message.To.Add(new MailboxAddress(data.Name[x], data.Email[x]));
-                //message.Bcc.Add(new MailboxAddress("Marito Ace", "support@odecci.com"));
-                //message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "skassab@alfardan.com.qa"));
-                //message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "dulay@alfardan.com.qa"));
-                message.Subject = "Test Only";
+            }
+            //message.Bcc.Add(new MailboxAddress("Marito Ace", "support@odecci.com"));
+            //message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "skassab@alfardan.com.qa"));
+            //message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "dulay@alfardan.com.qa"));
+            message.Subject = "Test Only";
                 var bodyBuilder = new BodyBuilder();
 
                 bodyBuilder.HtmlBody = @" <style>
-    body {
-      margin: 0;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      font-family: ""Montserrat"";
-    }
-    @font-face {
-      font-family: ""Montserrat"";
-      src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
-    }
-    .header {
-      width: 200px;
-      height: 120px;
-      overflow: hidden;
-      margin: 50px auto;
-    }
-    .body {
-      width: 500px;
-      margin: 5px auto;
-      font-size: 13px;
-    }
-    .body p {
-      margin: 20px 0;
-    }
-    ul li {
-      list-style: none;
-    }
-    .footer {
-      width: 500px;
-      margin: 20px auto;
-      font-size: 13px;
-    }
-    .citation span {
-      color: #c89328;
-    }
-    .body span {
-      color: #c89328;
-    }
-  </style>
-  <body>
-    <div class=""header"">
-      <img
-        src="" https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC-Black.png""
-        alt=""Alfardan Oyster Privilege Club""
-        width=""100%""
-      />
-    </div>
-    <div class=""body"">
-      <p class=citation>Dear <span> Admin </span></p>
-      <p class=body>
-         " + data.Body + " </span>.</p><p class=body> " +
-    " </div> <p class=footer>Regards, <br />" +
-     " <br /> " +
-     "Alfardan Oyster Privilege Club App " +
-     "</p>" +
-     "</body>";
+                body {
+                  margin: 0;
+                  box-sizing: border-box;
+                  display: flex;
+                  flex-direction: column;
+                  font-family: ""Montserrat"";
+                }
+                @font-face {
+                  font-family: ""Montserrat"";
+                  src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
+                }
+                .header {
+                  width: 200px;
+                  height: 120px;
+                  overflow: hidden;
+                  margin: 50px auto;
+                }
+                .body {
+                  width: 500px;
+                  margin: 5px auto;
+                  font-size: 13px;
+                }
+                .body p {
+                  margin: 20px 0;
+                }
+                ul li {
+                  list-style: none;
+                }
+                .footer {
+                  width: 500px;
+                  margin: 20px auto;
+                  font-size: 13px;
+                }
+                .citation span {
+                  color: #c89328;
+                }
+                .body span {
+                  color: #c89328;
+                }
+              </style>
+              <body>
+                <div class=""header"">
+                  <img
+                    src=""https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg""
+
+                    alt=""Alfardan Oyster Privilege Club""
+                    width=""100%""
+                  />
+                </div>
+                <div class=""body"">
+                  <p class=citation>Dear <span> Admin </span></p>
+                  <p class=body>
+                     " + data.Body + " </span>.</p><p class=body> " +
+                " </div> <p class=footer>Regards, <br />" +
+                 " <br /> " +
+                 "Alfardan Oyster Privilege Club App " +
+                 "</p>" +
+                 "</body>";
                 message.Body = bodyBuilder.ToMessageBody();
                 using (var client = new SmtpClient())
                 {
@@ -365,7 +555,6 @@ namespace API.Data.Controller
                     await client.DisconnectAsync(true);
 
                 }
-            }
             return Ok();
         }
 
@@ -421,11 +610,28 @@ namespace API.Data.Controller
         [HttpGet]
         public async Task<IActionResult> CorporateUserCountAll()
         {
-            string sql = $@"select Corp.CorporateName,Coalesce(Reg.RegCount,0) 'Registered',Coalesce(UnReg.UnRegCount,0) 'Unregistered',Coalesce(VIP.VipCount,0) 'Registered VIP',Coalesce(TotVIP.Count,0) 'Total VIP Count',Coalesce(TotVIP.Count,0) - Coalesce(VIP.VipCount,0) 'Remaining VIP',TotVIP.Count 'User Count' ,Coalesce(Reg.RegCount,0)  + Coalesce(VIP.VipCount,0) 'Total User' from (select Id, CorporateName from tbl_CorporateModel group by Id,CorporateName)As Corp
-            left join (select CorporateID,Count(*) 'RegCount' from UsersModel where Active = '1' and isVIP = 0 group by CorporateID)Reg on Corp.Id = Reg.CorporateID
-            left join (select CorporateID,Count(*) 'UnRegCount' from UsersModel where Active = '6' group by CorporateID)UnReg on Corp.Id = UnReg.CorporateID
-            left join (select CorporateID,Count(*) 'VipCount' from UsersModel where Active = '1' and isVIP = 1 group by CorporateID)VIP on Corp.Id = VIP.CorporateID
-            left join (select Id,Coalesce(VipCount,0) 'Count',Count 'UserCount' from tbl_CorporateModel)TotVIP on Corp.Id = TotVIP.Id";
+            //string sql = $@"select Corp.CorporateName,Coalesce(Reg.RegCount,0) 'Registered',Coalesce(UnReg.UnRegCount,0) 'Unregistered',Coalesce(VIP.VipCount,0) 'Registered VIP',Coalesce(TotVIP.Count,0) 'Total VIP Count',Coalesce(TotVIP.Count,0) - Coalesce(VIP.VipCount,0) 'Remaining VIP',TotVIP.Count 'User Count' ,Coalesce(Reg.RegCount,0)  + Coalesce(VIP.VipCount,0) 'Total User' from (select Id, CorporateName from tbl_CorporateModel group by Id,CorporateName)As Corp
+            //left join (select CorporateID,Count(*) 'RegCount' from UsersModel where Active = '1' and isVIP = 0 group by CorporateID)Reg on Corp.Id = Reg.CorporateID
+            //left join (select CorporateID,Count(*) 'UnRegCount' from UsersModel where Active = '6' group by CorporateID)UnReg on Corp.Id = UnReg.CorporateID
+            //left join (select CorporateID,Count(*) 'VipCount' from UsersModel where Active = '1' and isVIP = 1 group by CorporateID)VIP on Corp.Id = VIP.CorporateID
+            //left join (select Id,Coalesce(VipCount,0) 'Count',Count 'UserCount' from tbl_CorporateModel)TotVIP on Corp.Id = TotVIP.Id";
+            string sql = $@"SELECT
+	                        cm.Id
+	                        ,cm.CorporateName
+	                        ,sum(case when um.Active = '1' AND isVIP = 0  then 1 else 0 end) AS 'Registered'
+	                        ,sum(case when um.Active = '6' then 1 else 0 end) AS 'Unregistered'
+	                        ,sum(case when um.Active = '1' AND isVIP = 1 then 1 else 0 end) AS 'Registered VIP'
+	                        ,cm.VipCount AS 'Total VIP Count'
+	                        ,(cm.VipCount - sum(case when um.Active = '1' AND isVIP = 1 then 1 else 0 end)) AS 'Remaining VIP'
+	                        ,cm.Count AS 'User Count'
+	                        ,sum(case when um.Active = '1'  then 1 else 0 end) AS 'Total User'
+                        FROM 
+	                        tbl_CorporateModel cm WITH (NOLOCK)
+                        LEFT JOIN
+	                        UsersModel um WITH(NOLOCK)
+	                        ON um.CorporateID = cm.Id 
+                        WHERE cm.Status = '1'
+                        GROUP BY cm.CorporateName, cm.VipCount, cm.Count,cm.Id";
             var result = new List<CorporateUserCountVM>();
             DataTable table = db.SelectDb(sql).Tables[0];
 

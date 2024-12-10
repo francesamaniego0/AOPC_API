@@ -607,15 +607,54 @@ namespace AuthSystem.Data.Controller
 
             return Ok(result);
         }
-        [HttpGet]
-        public async Task<IActionResult> GetSupportDetailsList()
+        public class SupportDetailModelRequest
+        {
+            public string? status { get; set; }
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetSupportDetailsList(SupportDetailModelRequest data)
         {
             GlobalVariables gv = new GlobalVariables();
-
-            string sql = $@"SELECT        tbl_SupportModel.Id, tbl_SupportModel.Message, tbl_SupportModel.DateCreated, tbl_SupportModel.EmployeeID, CONCAT(UsersModel.Fname, ' ', UsersModel.Lname)  AS Fullname, tbl_StatusModel.Name AS Status
-                         FROM            tbl_SupportModel INNER JOIN
-                                                 UsersModel ON tbl_SupportModel.EmployeeID = UsersModel.EmployeeID INNER JOIN
-                                                 tbl_StatusModel ON tbl_SupportModel.Status = tbl_StatusModel.Id order by id desc";
+            string sql = "";
+            if (data.status == null)
+            {
+                sql = $@"SELECT        
+		                        tbl_SupportModel.Id
+		                        , tbl_SupportModel.Message
+		                        , tbl_SupportModel.DateCreated
+		                        , tbl_SupportModel.EmployeeID
+		                        , CONCAT(UsersModel.Fname, ' ', UsersModel.Lname)  AS Fullname
+		                        , UsersModel.Email
+		                        , tbl_StatusModel.Id AS StatusId
+                                , tbl_StatusModel.Name AS Status
+                        FROM            
+		                        tbl_SupportModel 
+		                        INNER JOIN UsersModel 
+		                        ON tbl_SupportModel.EmployeeID = UsersModel.EmployeeID
+		                        INNER JOIN tbl_StatusModel 
+		                        ON tbl_SupportModel.Status = tbl_StatusModel.Id 
+                        order by id desc";
+            }
+            else { 
+                sql = $@"SELECT        
+		                        tbl_SupportModel.Id
+		                        , tbl_SupportModel.Message
+		                        , tbl_SupportModel.DateCreated
+		                        , tbl_SupportModel.EmployeeID
+		                        , CONCAT(UsersModel.Fname, ' ', UsersModel.Lname)  AS Fullname
+		                        , UsersModel.Email
+		                        , tbl_StatusModel.Id AS StatusId
+                                , tbl_StatusModel.Name AS Status
+                        FROM            
+		                        tbl_SupportModel 
+		                        INNER JOIN UsersModel 
+		                        ON tbl_SupportModel.EmployeeID = UsersModel.EmployeeID
+		                        INNER JOIN tbl_StatusModel 
+		                        ON tbl_SupportModel.Status = tbl_StatusModel.Id 
+                        WHERE
+		                        tbl_StatusModel.Id = '"+data.status+"'order by id desc";
+            }
             DataTable dt = db.SelectDb(sql).Tables[0];
             var result = new List<SupportDetailModel>();
 
@@ -625,7 +664,9 @@ namespace AuthSystem.Data.Controller
                 item.Id = int.Parse(dr["Id"].ToString());
                 item.Message = dr["Message"].ToString();
                 item.Fullname = dr["Fullname"].ToString();
+                item.Email = dr["Email"].ToString();
                 item.EmployeeID = dr["EmployeeID"].ToString();
+                item.StatusId = dr["StatusId"].ToString();
                 item.Status = dr["Status"].ToString();
                 item.DateCreated = DateTime.Parse(dr["DateCreated"].ToString()).ToString("MM/dd/yyyy hh:mm:ss tt");
                 result.Add(item);
@@ -675,6 +716,202 @@ namespace AuthSystem.Data.Controller
 
             return Ok(result);
         }
+        public class SuportStatus
+        {
+            public int Id { get; set; }
+            public string Status { get; set; }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> updateSupportStatus(SuportStatus data)
+        {
+
+            string sql = $@"select * from tbl_supportmodel where Id='" + data.Id + "'";
+            DataTable dt = db.SelectDb(sql).Tables[0];
+            var result = new FamilyMemberStatus();
+            if (dt.Rows.Count > 0)
+            {
+                string query = $@"update tbl_supportmodel set Status = '" + data.Status + "' where Id ='" + data.Id + "'";
+
+                db.AUIDB_WithParam(query);
+                result.Status = "Successfully Updated";
+                return Ok(result);
+
+            }
+            else
+            {
+                result.Status = "Error";
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        public class SupportUpdateEmailRequest
+        {
+            public string Status { get; set; }
+            public string Name { get; set; }
+            public string Email { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EmailSupportUpdate(SupportUpdateEmailRequest data)
+        {
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
+            // Add all recipients at once
+            message.To.Add(new MailboxAddress(data.Name, data.Email));
+            message.Subject = "Status Update";
+            var bodyBuilder = new BodyBuilder();
+
+
+
+            bodyBuilder.HtmlBody = @" <head>
+                                        <style>
+                                            @font-face {font-family: 'Montserrat-Reg';src: url('/fonts/Montserrat/Montserrat-Regular.ttf');}
+                                            @font-face {
+                                            font-family: 'Montserrat-Bold';
+                                            src: url('/fonts/Montserrat/Montserrat-Bold.ttf');
+                                            }
+                                            @font-face {
+                                            font-family: 'Montserrat-SemiBold';
+                                            src: url('/fonts/Montserrat/Montserrat-SemiBold.ttf');
+                                            }
+                                            body {
+                                                margin: 0;
+                                                box-sizing: border-box;
+                                                justify-content: center;
+                                                align-items: center;
+                
+                                            }
+                                            .login-container {
+                                                background-image: url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);
+                                                
+                                                display: flex;
+                                                justify-content: center;
+                                                align-items: center;
+                                                flex-direction: column; 
+                                                background-size: cover;}
+                                            .gradient-border {
+                                                height: 600px;
+                                                width: 700px; 
+                                                justify-content: center;
+                                                background-color: transparent;
+                                                box-sizing: content-box;
+                                                gap: 20px;
+                                                flex-direction: column;
+                                                padding: 100px;
+                                            }
+                                            .login-container img {
+                                                margin: 20px auto;
+                                                width: 300px;
+                                                height: 110px;
+                                            }
+                                            h1 {
+                                                text-align: left;
+                                                color: #d7d2cb;
+                                                font-family: 'Montserrat-SemiBold';
+                                                font-size: 2rem;
+                                                font-style: italic;
+                                            }
+                                            h3 {
+                                                text-align: left;
+                                                color: #d7d2cb;
+                                                font-family: 'Montserrat-Reg';
+                                                font-size: 1.5rem;
+                                                font-style: italic;
+                                            }
+                                            a {
+                                                text-decoration: none;
+                                            }
+                                            h4 {
+                                                text-align: center;
+                                                color: #d7d2cb;
+                                                font-family: 'Montserrat-Reg';
+                                                font-size: 1.2rem;
+                                                font-style: italic;
+                                            }
+                                        </style>
+                                        </head>
+                                        <body>
+                                            <div class='login-container'>
+                                            <div class='login-logo-conctainer'>
+                                                <div class='gradient-border'>
+                                                <img src='https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC%20Logo%20-%20White.png' alt='AOPC' width='100%'' />
+
+                                                <h1>
+                                                    Dear " + data.Name + ",<br />" +
+                                                        "</h1>" +
+                                                        "<h1>We wanted to provide a quick update on the issue you raised.</h1>" +
+                                                        "<h1><strong>Status:</strong> " + data.Status + "</h1><br />" +
+                                                        "<h1>Thank you for your patience.</h1>" +
+                                                        "</div>" +
+                                                    "</div>" +
+                                                    "</div>" +
+                                                "</body>";
+            message.Body = bodyBuilder.ToMessageBody();
+            using (var client = new SmtpClient())
+            {
+                await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync("app@alfardan.com.qa", "Oyster2023!");
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+            }
+            return Ok();
+        }
+        public class SupportCountModel
+        {
+            public int Supportcount { get; set; }
+            public int TotalCount { get; set; }
+
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetSupportCount()
+        {
+            GlobalVariables gv = new GlobalVariables();
+
+            string sql = "";
+            string sql1 = "";
+            sql = $@"SELECT 
+	                    sc.Count 
+	                    ,SuppportCnt.*
+                    FROM 
+	                    tbl_TotalSupportCount sc WITH(NOLOCK)
+                    CROSS JOIN ( SELECT COUNT(*) AS SuppportCnt FROM tbl_SupportModel  WHERE (tbl_SupportModel.Status = 14) ) AS SuppportCnt";
+            DataTable dt = db.SelectDb(sql).Tables[0];
+            var result = new List<SupportCountModel>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                var item = new SupportCountModel();
+                item.TotalCount = int.Parse(dr["Count"].ToString());
+                item.Supportcount = int.Parse(dr["SuppportCnt"].ToString());
+                result.Add(item);
+
+            }
+            
+
+            return Ok(result);
+        }
+
+        public class SupportCountRequest
+        {
+            public int TotalCount { get; set; }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> updateSupportCount(SupportCountRequest data)
+        {
+            var result = new SupportCountRequest();
+            string query = $@"update tbl_TotalSupportCount set Count = '" + data.TotalCount + "' where Id ='1'";
+            db.AUIDB_WithParam(query);
+
+            return Ok(result);
+        }
+
+
         #region POST METHOD
 
         [HttpPost]
@@ -1328,8 +1565,6 @@ namespace AuthSystem.Data.Controller
                 double sub_total = 0;
                 if (dt.Rows.Count > 0)
                 {
-
-
                     foreach (DataRow dr in dt.Rows)
                     {
                         total += int.Parse(dr["count"].ToString());
@@ -1503,6 +1738,8 @@ namespace AuthSystem.Data.Controller
             public string Message { get; set; }
             public string EmployeeID { get; set; }
             public string Fullname { get; set; }
+            public string Email { get; set; }
+            public string StatusId { get; set; }
             public string Status { get; set; }
             public string DateCreated { get; set; }
 

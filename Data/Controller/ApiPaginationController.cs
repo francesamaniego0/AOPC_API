@@ -468,7 +468,8 @@ namespace AuthSystem.Data.Controller
                  tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id LEFT OUTER JOIN
                  tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id LEFT OUTER JOIN
                  tbl_StatusModel ON UsersModel.Active = tbl_StatusModel.Id
-                 WHERE        (UsersModel.Active IN (1, 2, 9, 10)) AND (UsersModel.Type = 3)";
+                 WHERE        (UsersModel.Active IN (1, 2, 9, 10)) AND (UsersModel.Type = 3)
+                 ";
 
                 if (data.CorpId != null)
                 {
@@ -495,7 +496,7 @@ namespace AuthSystem.Data.Controller
                     sql += " AND (UsersModel.Fname like '%" + data.FilterName + "%' or UsersModel.Lname like '%" + data.FilterName + "%' or tbl_CorporateModel.CorporateName like '%" + data.FilterName + "%')";
                 }
 
-                sql += " order by UsersModel.Id desc";
+                sql += " order by UsersModel.Fname ASC";
 
                 var result = new List<UserVM>();
                 DataTable table = db.SelectDb(sql).Tables[0];

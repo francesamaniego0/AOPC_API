@@ -1450,9 +1450,13 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
 
             try
             {
+                //List<FamilyMemberModel> famMemberList = await buildFamMemberSearchQuery(searchFilter).ToListAsync();
+                //var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
+                //return Ok(result);
                 List<FamilyMemberModel> famMemberList = await buildFamMemberSearchQuery(searchFilter).ToListAsync();
-                var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
-                return Ok(result);
+                //var result = buildBirthTypesPagedModel(searchFilter, famMemberList);
+                //var result = List<FamilyMemberModel>();
+                return Ok(famMemberList);
             }
             catch (Exception ex)
             {
