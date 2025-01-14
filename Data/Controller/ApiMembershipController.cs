@@ -506,9 +506,23 @@ ORDER BY tbl_MembershipModel.Id DESC";
             string imgfile = "";
             if (dt.Rows.Count != 0)
             {
-                string sql_user = $@"select * from UsersModel inner JOIN
-                        tbl_CorporateModel on UsersModel.CorporateID = tbl_CorporateModel.Id
-                        where tbl_CorporateModel.MembershipID = '" + data.Id + "' and UsersModel.Active <> 6   ";
+                //string sql_user = $@"select * from UsersModel inner JOIN
+                //        tbl_CorporateModel on UsersModel.CorporateID = tbl_CorporateModel.Id
+                //        where tbl_CorporateModel.MembershipID = '" + data.Id + "' and UsersModel.Active <> 6   ";
+                string sql_user = $@"SELECT DISTINCT
+	                                    mem.* 
+                                    FROM tbl_membershipmodel mem WITH(NOLOCK)
+                                    LEFT JOIN tbl_corporatemodel corp WITH(NOLOCK)
+                                    ON mem.id = corp.MembershipId
+                                    LEFT JOIN tbl_offeringmodel offe WITH(NOLOCK)
+                                    ON offe.MembershipId = mem.id
+
+                                    WHERE mem.status = 5  
+                                    AND
+                                    (corp.id is not null
+                                    OR
+                                    offe.Id is not null)
+                                    AND MEM.ID ='" + data.Id + "'";
                 DataTable dt_user = db.SelectDb(sql_user).Tables[0];
                 if (dt_user.Rows.Count == 0)
 

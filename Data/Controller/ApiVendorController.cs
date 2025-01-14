@@ -518,11 +518,38 @@ FROM            tbl_VendorModel INNER JOIN
             if (dt.Rows.Count != 0)
             {
 
-                string OTPInsert = $@"update tbl_VendorModel set Status = 6 where id ='" + data.Id + "'";
-                db.AUIDB_WithParam(OTPInsert);
-                result.Status = "Succesfully deleted";
+                
 
-                return Ok(result);
+                
+                string sql_user = $@"select 
+	                                    v.*
+                                    from tbl_VendorModel v with(nolock)
+                                    left join tbl_offeringmodel offe with(nolock)
+                                    on offe.vendorid = v.id
+                                    left join tbl_privilegemodel pm with(nolock)
+                                    on pm.vendorid = v.id
+
+                                    where v.Status = 5
+                                    and
+                                    (offe.id is not null
+                                    or pm.id is not null)
+                                    and
+                                    v.id = '" + data.Id + "'";
+                DataTable dt_user = db.SelectDb(sql_user).Tables[0];
+                if (dt_user.Rows.Count == 0)
+
+                {
+
+                    string OTPInsert = $@"update tbl_VendorModel set Status = 6 where id ='" + data.Id + "'";
+                    db.AUIDB_WithParam(OTPInsert);
+                    result.Status = "Succesfully deleted";
+                    return Ok(result);
+                }
+                else
+                {
+                    result.Status = "Vendor is being used and cannot be deleted!";
+                    return Ok(result);
+                }
 
             }
             else

@@ -415,13 +415,34 @@ ORDER BY tbl_PrivilegeModel.Id DESC";
             string imgfile = "";
             if (dt.Rows.Count != 0)
             {
-                
-                string OTPInsert = $@"update tbl_PrivilegeModel set Active = 6 where id ='"+data.Id+"'";
-                db.AUIDB_WithParam(OTPInsert);
-                result.Status = "Succesfully deleted";
 
-                return Ok(result);
 
+                //string sql1 = $@"select * from UsersModel where CorporateID ='" + data.Id + "' and  Active IN (1,2,9,10)";
+                string sql1 = $@"select DISTINCT
+                                pr.ID
+                                from tbl_PrivilegeModel pr with(nolock)
+                                LEFT JOIN tbl_MembershipPrivilegeModel mr WITH(NOLOCK)
+                                ON mr.PrivilegeID = pr.Id
+                                WHERE pr.Active = 5
+                                AND
+                                (mr.id is not null)
+                                AND pr.ID ='" + data.Id +"'";
+                DataTable dt1 = db.SelectDb(sql1).Tables[0];
+                if (dt1.Rows.Count == 0)
+                {
+                    string OTPInsert = $@"update tbl_PrivilegeModel set Active = 6 where id ='" + data.Id + "'";
+                    db.AUIDB_WithParam(OTPInsert);
+                    result.Status = "Succesfully deleted";
+
+                    return Ok(result);
+                }
+                else
+                {
+                    result.Status = "Privelege is Already in Used!";
+
+                    return BadRequest(result);
+
+                }
             }
             else
             {

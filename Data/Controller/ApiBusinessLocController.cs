@@ -148,7 +148,14 @@ namespace AuthSystem.Data.Controller
             if (dt.Rows.Count != 0)
             {
 
-                string sql1 = $@"select * from tbl_BusinessModel where LocationId ='" + data.Id + "'";
+                //string sql1 = $@"select * from tbl_BusinessModel where LocationId ='" + data.Id + "'";
+                string sql1 = $@"SELECT TOP 1 bl.id, bl.Country, v.BusinessLocationID, b.LocationId FROM tbl_BusinessLocationModel  AS bl  WITH(NOLOCK)
+                                LEFT JOIN tbl_BusinessModel AS b WITH(NOLOCK)
+                                ON b.LocationId = bl.id
+                                LEFT JOIN tbl_VendorModel AS v WITH(NOLOCK)
+                                ON v.BusinessLocationID = CONVERT(varchar(10), bl.id)
+                                WHERE 
+                                bl.id = '" + data.Id + "' AND bl.Active = '5'AND (b.LocationId IS NOT NULL OR v.BusinessLocationID IS NOT NULL)";
                 DataTable dt1 = db.SelectDb(sql1).Tables[0];
                 if (dt1.Rows.Count == 0)
                 {
@@ -159,7 +166,7 @@ namespace AuthSystem.Data.Controller
                 }
                 else
                 {
-                    result.Status = "Business Type is Already in Used!";
+                    result.Status = "Business Location is Already in Used!";
 
                     return BadRequest(result);
 

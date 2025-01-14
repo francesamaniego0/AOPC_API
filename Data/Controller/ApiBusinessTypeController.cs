@@ -174,7 +174,16 @@ ORDER BY tbl_BusinessTypeModel.Id DESC";
             if (dt.Rows.Count != 0)
             {
 
-                string sql1 = $@"select * from tbl_BusinessModel where TypeId ='" + data.Id + "'";
+                //string sql1 = $@"select * from tbl_BusinessModel where TypeId ='" + data.Id + "'";
+                string sql1 = $@"SELECT TOP 1 bt.id, v.BusinessTypeId, o.BusinessTypeId, p.BusinessTypeId FROM tbl_BusinessTypeModel bt WITH(NOLOCK)
+                                    LEFT JOIN tbl_VendorModel v WITH(NOLOCK)
+                                    ON bt.Id = v.BusinessTypeId
+                                    LEFT JOIN tbl_OfferingModel o WITH(NOLOCK)
+                                    ON bt.Id = o.BusinessTypeID
+                                    LEFT JOIN tbl_PrivilegeModel p WITH(NOLOCK)
+                                    ON bt.Id = p.BusinessTypeID
+                                    WHERE 
+                                    bt.id = '" + data.Id + "' AND (o.BusinessTypeId IS NOT NULL OR v.BusinessTypeId IS NOT NULL OR p.BusinessTypeId IS NOT NULL)";
                 DataTable dt1 = db.SelectDb(sql1).Tables[0];
                 if (dt1.Rows.Count == 0)
                 {

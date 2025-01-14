@@ -60,7 +60,7 @@ case when tbl_UserTypeModel.UserType is null then 'ADMIN' else tbl_UserTypeModel
                          UsersModel ON tbl_audittrailModel.EmployeeID = UsersModel.EmployeeID LEFT OUTER JOIN
                          tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id LEFT OUTER JOIN
                          tbl_CorporateModel ON UsersModel.CorporateID = tbl_CorporateModel.Id LEFT OUTER JOIN
-                         tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id order by id desc";
+                         tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id order by tbl_audittrailModel.DateCreated desc";
             var result = new List<Audittrailvm>();
             DataTable table = db.SelectDb(sql).Tables[0];
 

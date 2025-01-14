@@ -348,7 +348,7 @@ namespace AuthSystem.Data.Controller
             var result = new ExpiryRes();
             try
             {
-                string sql = $@"select  Token,expiryDate from tbl_TokenModel where Token='" + data.Email + "'";
+                string sql = $@"select  Token,expiryDate from tbl_TokenModel where Token='" + data.Email + "' order by id desc";
                 DataTable dt = db.SelectDb(sql).Tables[0];
                 if (dt.Rows.Count == 0)
                 {
