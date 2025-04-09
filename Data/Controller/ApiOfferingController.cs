@@ -657,6 +657,47 @@ WHERE        (tbl_OfferingModel.OfferingID = '" +data.OfferingID + "') and Statu
 
             return Ok(result);
         }
+        [HttpPost]
+        public async Task<IActionResult> ImportOffering(List<OfferingVM> list)
+        {
+            string result = "";
+            string FeaturedImage = "https://www.alfardanoysterprivilegeclub.com/assets/img/defaultavatar.png";
+            try
+            {
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    
+                    string sql = $@"select * from tbl_OfferingModel where OfferingName='" + list[i].OfferingName.Replace("'", "''") + "' and StatusID = 5";
+                    DataTable dt = db.SelectDb(sql).Tables[0];
+                    if (dt.Rows.Count == 0)
+                    {
+                        string Insert = $@"insert into tbl_OfferingModel (VendorID,MembershipID,BusinessTypeID,OfferingName,PromoDesc,PromoReleaseText,ImgUrl,StatusID,PrivilegeID,Url,OfferDays,StartDate,EndDate,FromTime,ToTime) values 
+                                   ('" + list[i].VendorID + "','"+ list[i].MembershipID +"','" + list[i].BusinessTypeID + "','" + list[i].OfferingName.Replace("'", "''") + "','" + list[i].PromoDesc.Replace("'", "''") + "','" + list[i].PromoReleaseText + "','" + FeaturedImage + "',5,'" + list[i].PrivilegeID + "'" +
+                                   ",'" + list[i].URL + "','" + list[i].Offerdays + "','" + list[i].StartDateTime + "','" + list[i].EndDateTime + "','" + list[i].FromTime + "','" + list[i].ToTime + "')";
+                        db.AUIDB_WithParam(Insert);
+
+                        _global.Status = "Successfully Saved.";
+                    }
+                    else
+                    {
+
+                        _global.Status = "Duplicate Entry.";
+                    }
+
+                }
+                result = "Registered Successfully";
+
+
+            }
+            catch (Exception ex)
+            {
+                _global.Status = ex.GetBaseException().ToString();
+
+            }
+
+            return Content(_global.Status);
+        }
         public class DeleteOffer
         {
 

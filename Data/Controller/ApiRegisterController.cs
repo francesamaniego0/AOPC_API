@@ -29,6 +29,10 @@ using API.Models;
 using CMS.Models;
 using Org.BouncyCastle.Asn1.Mozilla;
 using static AuthSystem.Data.Controller.ApiPaginationController;
+using MimeKit;
+using MailKit.Net.Smtp;
+using static API.Data.Controller.ApiCorporateListingController;
+using static AuthSystem.Data.Controller.ApiSupportController;
 
 namespace AuthSystem.Data.Controller
 {
@@ -877,6 +881,8 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                             filepath = "https://www.alfardanoysterprivilegeclub.com/assets/img/" + list[i].FilePath.Replace(" ", "%20");
                         }
                         string EncryptPword = Cryptography.Encrypt(list[i].Password);
+                        list[i].Fname = list[i].Fname.Replace("'", "''");
+                        list[i].Lname = list[i].Lname.Replace("'", "''");
                         var fullname = list[i].Fname + " " + list[i].Lname;
                        query += $@"insert into UsersModel (Username,Password,Fullname,Fname,Lname,Email,Gender,CorporateID,PositionID,JWToken,FilePath,Active,Cno,isVIP,Address,Type,EmployeeID,DateCreated) values
                          ('" + list[i].Username + "','','" + fullname + "','" + list[i].Fname + "','" + list[i].Lname + "','" + list[i].Email + "','" + list[i].Gender + "','" + list[i].CorporateID + "','" + list[i].PositionID + "','" + string.Concat(strtokenresult.TakeLast(15)) + "','" + filepath + "','2','" + list[i].Cno + "','" + list[i].isVIP + "','N/A','" + list[i].Type + "','" + list[i].EmployeeID + "','"+DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")+"')";
@@ -1071,11 +1077,30 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                         DataTable dt1 = db.SelectDb(sql1).Tables[0];
                         string sql = $@"select * from usersmodel where EmployeeID='" + data.EmployeeID + "' and Active <> 6  and  CorporateID ='"+data.CorporateID+ "' and Email='"+data.Email+"' and Username ='"+data.Username+"'";
                         DataTable dt = db.SelectDb(sql).Tables[0];
+                        string sqlUserCount = $@"SELECT 
+	                                                COUNT(CASE WHEN um.active = 1 THEN um.id END) AS userCount,
+	                                                cm.count
+                                                FROM tbl_CorporateModel cm
+                                                left join UsersModel um
+                                                on cm.id = um.CorporateID
+ 
+                                                where cm.Id = '" + data.CorporateID + "' group by cm.count";
+                        DataTable dtUserCount = db.SelectDb(sqlUserCount).Tables[0];
+                        var userCorpCount = 0;
+                        var userCurrentCorpCount = 0;
+                        foreach (DataRow dr in dtUserCount.Rows)
+                        {
+                            userCorpCount = int.Parse(dr["count"].ToString());
+                            userCurrentCorpCount = int.Parse(dr["userCount"].ToString());
+                        }
                         if (dt1.Rows.Count != 0)
                         {
                             result = "User Information Already Used!";
                         }
-
+                        else if (userCurrentCorpCount >= userCorpCount)
+                        {
+                            result = "User registration limit reached, no additional users can be registered at this time!";
+                        }
                         else if (dt.Rows.Count == 0)
                         {
 
@@ -1178,11 +1203,11 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
 
 
                     }
-                    else
-                    {
-                        result = "Error in Registration";
-                    }
-                    return Ok(result);
+                else
+                {
+                    result = "Error in Registration";
+                }
+                return Ok(result);
                 
             }
 
@@ -1192,7 +1217,85 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
             }
        
         }
+        public class CoporateVIP
+        {
+            public int CorporateID { get; set; }
+            public string? Fullname { get; set; }
+            public string? AdminEmail { get; set; }
 
+        }
+        [HttpPost]
+        public async Task<IActionResult> EmailRemainingVIP(CoporateVIP data)
+        {
+            //Console.Write(data.Name.Count());
+            string sql = "";
+            string status = "";
+            //sql = $@"select Count(*) as count from UsersModel where active=1";
+            int remainingVip = 0;
+            string corp = "";
+            sql = $@"SELECT
+	                cm.CorporateName AS 'CorporateName'
+	                ,(cm.VipCount - sum(case when um.Active = '1' AND isVIP = 1 then 1 else 0 end)) AS 'RemainingVIPCount'
+                    FROM 
+	                    tbl_CorporateModel cm WITH (NOLOCK)
+                    LEFT JOIN
+	                    UsersModel um WITH(NOLOCK)
+	                    ON um.CorporateID = cm.Id 
+                    WHERE cm.Status = '1' and cm.id = '" +data.CorporateID + "'GROUP BY cm.CorporateName, cm.VipCount, cm.Count,cm.Id";
+            DataTable dt = db.SelectDb(sql).Tables[0];
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                remainingVip = int.Parse(dr["RemainingVIPCount"].ToString());
+                corp = dr["CorporateName"].ToString();
+            }
+            Console.WriteLine();
+            if(remainingVip == 0)
+            {
+                string body = "Remaining VIP";
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
+                //for (int x = 0; x < data.Name.Length; x++)
+                //{
+                //    message.To.Add(new MailboxAddress(data.Name[x], data.Email[x]));
+                //}
+                message.To.Add(new MailboxAddress(data.Fullname, data.AdminEmail));
+                message.Subject = "Remaining VIP";
+                var bodyBuilder = new BodyBuilder();
+
+                    bodyBuilder.HtmlBody = @" <body>
+                                                    <div class='container-holder' style='font-size:16px;font-family:Helvetica,sans-serif;margin:0;padding:100px 0;line-height:1.3;background-image:url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);background-repeat:no-repeat;background-size:cover;display: flex;justify-content:center;align-items:center;'>
+                                                        <div class='container' style='font-size:16px;font-family:Helvetica,sans-serif;background-color:white;margin: 30%;border-radius:15px;padding:24px;box-sizing:border-box;'>
+                                                        <div class='logo-holder' style='justify-content: center;'>
+                                                                <img style='margin-left: 25%' src='https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg' alt='Alfardan Oyster Privilege Club' width='50%' />
+                                                                </div>
+                                                                    </br>
+                                                                <p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>Dear "+data.Fullname+",</p>"
+                                                                + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>I hope this message finds you well.</br></br>"
+                                                                    + "Please be informed that the allocated VIP count for your company has been fully utilized. As a result, no additional VIP registrations can be processed at this time.</p>"
+                                                              + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>If you have any issues or need further assistance, please contact our support team at <a href='mailto:afpmarketing@alfardan.com.qa'>afpmarketing@alfardan.com.qa</a>.</p> "
+                                                              + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>Thank you!</p> "
+                                                         
+                                                        + "</div> "
+                                                  + "</div> "
+                                                + "</body> "; 
+                message.Body = bodyBuilder.ToMessageBody();
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+                status = "error";
+            }
+            else
+            {
+                status = "success";
+            }
+
+            return Ok(status);
+        }
         public class ChangePW
         {
 
@@ -1221,7 +1324,7 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
             var result = new Registerstats();
             try
             {
-                string sql = $@"select * from UsersModel where Email ='" + data.Email + "' AND Status=1";
+                string sql = $@"select * from UsersModel where Email ='" + data.Email + "' AND Active=1";
                 DataTable dt = db.SelectDb(sql).Tables[0];
                 if (dt.Rows.Count > 0)
                 {
@@ -1382,10 +1485,30 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                 return ex.Message;
             }
         }
-
-        [HttpPost]
-        public async Task<ActionResult<FamilyMemberModel>> SaveFamilyMember(FamilyMemberModel famMember)
+        public class FamilyMemberModelreq
         {
+            public int Id { get; set; }
+            public string Fullname { get; set; }
+            public string Relationship { get; set; }
+            public int FamilyUserId { get; set; }
+            public string ApplicationStatus { get; set; }
+            public int Status { get; set; }
+            public string? DateCreated { get; set; }
+        }
+        [HttpPost]
+        public async Task<ActionResult<FamilyMemberModel>> SaveFamilyMember(FamilyMemberModelreq famMember)
+        {
+            //famMember.DateCreated = DateTime.Today;
+            //DateTime dateTime = DateTime.Parse(date);
+            //
+            var item = new FamilyMemberModel();
+            item.Fullname = famMember.Fullname;
+            item.Relationship = famMember.Relationship;
+            item.FamilyUserId = famMember.FamilyUserId;
+            item.ApplicationStatus = famMember.ApplicationStatus;
+            item.Status = famMember.Status;
+            item.DateCreated = DateTime.Parse(famMember.DateCreated);
+
             if (_context.tbl_FamilyMember == null)
             {
                 return Problem("Entity set '_context.tbl_FamilyMember'  is null.");
@@ -1400,10 +1523,10 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
 
             try
             {
-                _context.tbl_FamilyMember.Add(famMember);
+                _context.tbl_FamilyMember.Add(item);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("SaveFamilyMember", new { id = famMember.Id }, famMember);
+                return CreatedAtAction("SaveFamilyMember", new { id = item.Id }, item);
             }
             catch (Exception ex)
             {
@@ -1575,7 +1698,7 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> update(int id, FamilyMemberModel famMember)
+        public async Task<IActionResult> update(int id, FamilyMemberModelreq famMember)
         {
             if (_context.tbl_FamilyMember == null)
             {
@@ -1602,9 +1725,24 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                 return Conflict("Entity already exists");
             }
 
+            string sql = $@"SELECT DateCreated FROM tbl_FamilyMember WHERE ID ='"+id+"'";
+            DataTable table = db.SelectDb(sql).Tables[0];
+            string dateCreatedexisting = "";
+            foreach (DataRow dr in table.Rows)
+            {
+                 dateCreatedexisting = Convert.ToDateTime(dr["DateCreated"].ToString()).ToString("yyyy-MM-dd");
+            }
+            var item = new FamilyMemberModel();
+            item.Id = id;
+            item.Fullname = famMember.Fullname;
+            item.Relationship = famMember.Relationship;
+            item.FamilyUserId = famMember.FamilyUserId;
+            item.ApplicationStatus = famMember.ApplicationStatus;
+            item.Status = famMember.Status;
+            item.DateCreated = DateTime.Parse(dateCreatedexisting);
             try
             {
-                _context.Entry(famMember).State = EntityState.Modified;
+                _context.Entry(item).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
                 return Ok("Update Successful!");

@@ -53,7 +53,8 @@ namespace AuthSystem.Data.Controller
 
         public IActionResult LogIn (UserModel data)
         {
-            var pass3 = Cryptography.Decrypt("KOECkOzDU7+PCgWECK4nMGj5Oy0LOyqcEdO1ek1Jiz8=");
+            var pass3 = Cryptography.Decrypt("eomUOZIK5B4GM7T9HKSucNiBk9Yb0PzwFXxHClG80Ag=");
+            //Console.WriteLine(pass3);
             string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             //_global.Status = gv.ValidationUser(data.Username, data.Password, _context);
             bool compr_user = false;

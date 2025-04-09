@@ -230,20 +230,32 @@ namespace AuthSystem.Data.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendNotificationPerCorporate(CorporateNotificationEmailRequest data)
+        public async Task<IActionResult> SendNotificationPerUserCorporate(CorporateNotificationEmailRequest data)
         {
             int isRead = 0;
+
+            List<CorporateNotificationData> item = new List<CorporateNotificationData>();
             for (int x = 0; x < data.CorporateList.Length; x++)
             {
-                List<CorporateNotificationData> item = new List<CorporateNotificationData>();
                 item = dbmet.GetCompanyUserDetails(data.CorporateList[x]);
-                foreach(var a in item)
-                {
-                    string Insert = $@"insert into tbl_NotificationModel (EmployeeID,Details,isRead,Module,ItemID,EmailStatus,DateCreated) values
-                        ('" + a.EmployeeID + "','" + data.Body + "','" + isRead + "','" + "Company" + "','" + a.CompanyID + "','" + 15 + "','" + DateTime.Now.ToString("yyyy-MM-dd") + "') ";
-                    db.AUIDB_WithParam(Insert);
-                }
+                
             }
+            //Console.WriteLine(item);
+            //Console.WriteLine("Hello");
+            //for (int x = 0; x < item.Count; x++)
+            //{
+            //    string Insert = $@"insert into tbl_NotificationModel (EmployeeID,Details,isRead,Module,ItemID,EmailStatus,DateCreated) values
+            //            ('" + item[x].EmployeeID + "','" + data.Body + "','" + isRead + "','" + "Company" + "','" + item[x].CompanyID + "','" + 15 + "','" + DateTime.Now.ToString("yyyy-MM-dd") + "') ";
+            //    db.AUIDB_WithParam(Insert);
+
+            //}
+            foreach (var a in item)
+            {
+                string Insert = $@"insert into tbl_NotificationModel (EmployeeID,Details,isRead,Module,ItemID,EmailStatus,DateCreated) values
+                        ('" + a.EmployeeID + "','" + data.Body + "','" + isRead + "','" + "Company" + "','" + a.CompanyID + "','" + 15 + "','" + DateTime.Now.ToString("yyyy-MM-dd") + "') ";
+                db.AUIDB_WithParam(Insert);
+            }
+
             return Ok();
         }
 

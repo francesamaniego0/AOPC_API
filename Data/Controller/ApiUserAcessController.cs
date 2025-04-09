@@ -112,58 +112,75 @@ namespace AuthSystem.Data.Controller
                 message.Subject = "Email Registration Link";
                 var bodyBuilder = new BodyBuilder();
                 string img = "../img/AOPCBlack.jpg";
-                bodyBuilder.HtmlBody = @"<!DOCTYPE html>
-                <html lang=""en"">
-                <head>
-                    <meta charset=""UTF-8"">
-                    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-                    <meta http-equiv=""X-UA-Compatible"" content=""ie=edge"">
-                    <title>Oyster Privilege Club</title>
-                </head>
-                <style>
-                    @font-face {
-                    font-family: 'Montserrat-Reg';
-                    src: 
-                    url('{{ config('app.url') }}/assets/fonts/Montserrat/Montserrat-Regular.ttf');
-                    }
-                    @font-face {
-                        font-family: 'Montserrat-SemiBold';
-                        src: url('{{ config('app.url') }}/assets/fonts/Montserrat/Montserrat-SemiBold.ttf');
-                    }
-                    body{
-                        display: flex;
-                        flex-direction: column;
-                        font-family: 'Montserrat-Reg';
-                    }
-                    .img-container {
-                        width: 200px;
-                        margin:0 auto;
-                    }
-                    h3{
-                        width: 400px;
-                        text-align: center;
-                        margin:20px auto;
-                    }
-                    p{
-                        width: 400px;
-                        margin:10px auto;
-                    }
-                </style>
-                <body>
-                    <div class=""img-container"">
-                        <img width=""100%"" src=""https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC-low-black.png"" alt="""">
-                    </div>
-                    <h3>Reset Password</h3>
-                    <p>We received a request to reset the password for your account. If you did not initiate this request, please ignore this email.</p>
-                    <p>To reset your password, please click the following link:<a href="+emailsend+">"+emailsend+"</a>. This link will be valid for the next 24 hours.</p>" +
-                    "<p>If you have any issues with resetting your password or need further assistance, please contact our support team at <b>app@alfaran.com.qa</b>.</p>" +
-                "</body> "+
-                "</html>";
+                //bodyBuilder.HtmlBody = @"<!DOCTYPE html>
+                //<html lang=""en"">
+                //<head>
+                //    <meta charset=""UTF-8"">
+                //    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                //    <meta http-equiv=""X-UA-Compatible"" content=""ie=edge"">
+                //    <title>Oyster Privilege Club</title>
+                //</head>
+                //<style>
+                //    @font-face {
+                //    font-family: 'Montserrat-Reg';
+                //    src: 
+                //    url('{{ config('app.url') }}/assets/fonts/Montserrat/Montserrat-Regular.ttf');
+                //    }
+                //    @font-face {
+                //        font-family: 'Montserrat-SemiBold';
+                //        src: url('{{ config('app.url') }}/assets/fonts/Montserrat/Montserrat-SemiBold.ttf');
+                //    }
+                //    body{
+                //        display: flex;
+                //        flex-direction: column;
+                //        font-family: 'Montserrat-Reg';
+                //    }
+                //    .img-container {
+                //        width: 200px;
+                //        margin:0 auto;
+                //    }
+                //    h3{
+                //        width: 400px;
+                //        text-align: center;
+                //        margin:20px auto;
+                //    }
+                //    p{
+                //        width: 400px;
+                //        margin:10px auto;
+                //    }
+                //</style>
+                //<body>
+                //    <div class=""img-container"">
+                //        <img width=""100%"" src=""https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC-low-black.png"" alt="""">
+                //    </div>
+                //    <h3>Reset Password</h3>
+                //    <p>We received a request to reset the password for your account. If you did not initiate this request, please ignore this email.</p>
+                //    <p>To reset your password, please click the following link:<a href="+emailsend+">"+emailsend+"</a>. This link will be valid for the next 24 hours.</p>" +
+                //    "<p>If you have any issues with resetting your password or need further assistance, please contact our support team at <b>app@alfaran.com.qa</b>.</p>" +
+                //"</body> "+
+                //"</html>";
+                bodyBuilder.HtmlBody = @" <body>
+                                           <div class='container-holder' style='font-size:16px;font-family:Helvetica,sans-serif;margin:0;padding:100px 0;line-height:1.3;background-image:url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);background-repeat:no-repeat;background-size:cover;display: flex;justify-content:center;align-items:center;'>
+                                                <div class='container' style='font-size:16px;font-family:Helvetica,sans-serif;background-color:white;margin: 30%;border-radius:15px;padding:24px;box-sizing:border-box;'>
+                                                <div class='logo-holder' style='justify-content: center;'>
+                                                     <img style='margin-left: 25%' src='https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg' alt='Alfardan Oyster Privilege Club' width='50%' />
+                                                     </div>
+                                                         </br>
+                                                       <p style='font-family: Helvetica, sans-serif; font-size: 18px; font-weight: bold; margin: 0; margin-bottom: 16px; text-align: center'>
+                                                            Reset Password</p>
+                                                       <p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>We received a request to reset the password for your account. If you did not initiate this request, please ignore this email.</br></br>
+                                                        To reset your password, please click the following link:<a href="+emailsend+">"+emailsend+"</a>. This link will be valid for the next 24 hours.</p>"
+          
+                                                       + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>If you have any issues with resetting your password or need further assistance, please contact our support team at <a href='mailto:app@alfaran.com.qa'>app@alfaran.com.qa</a>.</p> "
+                                                       + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>Thank you!</br>Best regard,</br>Alfardan Oyster Privilege Club App</p> "
+                                                + "</div> "
+                                            + "</div> "
+                                         + "</body>";
                 message.Body = bodyBuilder.ToMessageBody();
                 using (var client = new SmtpClient())
                 {
                     client.Connect("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    client.Authenticate("app@alfardan.com.qa", "Oyster2023!");
+                    client.Authenticate("app@alfardan.com.qa", "0!S+Er-@Pp");
                     client.Send(message);
                     client.Disconnect(true);
                     status = "Successfully sent registration email";
@@ -216,96 +233,152 @@ namespace AuthSystem.Data.Controller
                     message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
                     //message.To.Add(new MailboxAddress("Ace Caspe", "ace.caspe@odecci.com"));
                     //message.To.Add(new MailboxAddress("Marito Ace", data.Email));
-                    message.To.Add(new MailboxAddress("Alfardan Marketing", "mmohandas@alfardan.com.qa"));
+                    //message.To.Add(new MailboxAddress("Alfardan Marketing", "mmohandas@alfardan.com.qa"));
+                    //To and BCC
+                    message.To.Add(new MailboxAddress("Alfardan Marketing", "app@alfardan.com.qa"));
                     message.To.Add(new MailboxAddress("Alfardan Marketing", "ccaspe@alfardan.com.qa"));
+                    message.To.Add(new MailboxAddress("Alfardan Marketing", "rsantos@alfardan.com.qa"));
+                    message.To.Add(new MailboxAddress("Alfardan Marketing", "cchirvase@alfardan.com.qa"));
+                    message.To.Add(new MailboxAddress("Alfardan Marketing", "rbekdach@alfardan.com.qa"));
+                    message.To.Add(new MailboxAddress("Alfardan Marketing", "cchirvase@alfardan.com.qa"));
                     message.Bcc.Add(new MailboxAddress("Alfardan Support", "support@odecci.com"));
                     message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "skassab@alfardan.com.qa"));
                     message.Bcc.Add(new MailboxAddress("Alfardan Marketing", "dulay@alfardan.com.qa"));
+                    //To and BCC
+                    //Test
+                    //message.To.Add(new MailboxAddress("Alfardan Marketing", "france.samaniego@odecci.com"));
+                    //Test
                     message.ReplyTo.Add(new MailboxAddress(fullname, dt.Rows[0]["Email"].ToString()));
                     message.Subject = "AOPC Support Concern";
-                var bodyBuilder = new BodyBuilder();
+                    var bodyBuilder = new BodyBuilder();
 
-                bodyBuilder.HtmlBody = @" <style>
-    body {
-      margin: 0;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      font-family: ""Montserrat"";
-    }
-    @font-face {
-      font-family: ""Montserrat"";
-      src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
-    }
-    .header {
-      width: 200px;
-      height: 120px;
-      overflow: hidden;
-      margin: 50px auto;
-    }
-    .body {
-      width: 500px;
-      margin: 5px auto;
-      font-size: 13px;
-    }
-    .body p {
-      margin: 20px 0;
-    }
-    ul li {
-      list-style: none;
-    }
-    .footer {
-      width: 500px;
-      margin: 20px auto;
-      font-size: 13px;
-    }
-    .citation span {
-      color: #c89328;
-    }
-    .body span {
-      color: #c89328;
-    }
-  </style>
-  <body>
-    <div class=""header"">
-      <img
-        src="" https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC-Black.png""
-        alt=""Alfardan Oyster Privilege Club""
-        width=""100%""
-      />
-    </div>
-    <div class=""body"">
-      <p class=citation>Dear <span> Team, </span></p>
-      <p class=body>" +
-      data.Message+
- 
-    " </div> <p class=footer>Regards, <br />" +
-     " <br /> " +
-     "<p class=footer>Employee ID: " + data.EmployeeID + " </p> " +
-      "<p class=footer>Full Name: " + fullname + " </p> " +
-       "<p class=footer>Contact Number: " + dt.Rows[0]["Email"].ToString() + " </p>" +
-        "<p class=footer>Corporate Name: " + dt.Rows[0]["CorporateName"].ToString() + " </p>" +
-         "<p class=footer>Position: " + dt.Rows[0]["Name"].ToString() + " </p>" +
+                    //bodyBuilder.HtmlBody = @" <style>
+                    //                                body {
+                    //                                  margin: 0;
+                    //                                  box-sizing: border-box;
+                    //                                  display: flex;
+                    //                                  flex-direction: column;
+                    //                                  font-family: ""Montserrat"";
+                    //                                }
+                    //                                @font-face {
+                    //                                  font-family: ""Montserrat"";
+                    //                                  src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
+                    //                                }
+                    //                                .header {
+                    //                                  width: 200px;
+                    //                                  height: 120px;
+                    //                                  overflow: hidden;
+                    //                                  margin: 50px auto;
+                    //                                }
+                    //                                .body {
+                    //                                  width: 500px;
+                    //                                  margin: 5px auto;
+                    //                                  font-size: 13px;
+                    //                                }
+                    //                                .body p {
+                    //                                  margin: 20px 0;
+                    //                                }
+                    //                                ul li {
+                    //                                  list-style: none;
+                    //                                }
+                    //                                .footer {
+                    //                                  width: 500px;
+                    //                                  margin: 20px auto;
+                    //                                  font-size: 13px;
+                    //                                }
+                    //                                .citation span {
+                    //                                  color: #c89328;
+                    //                                }
+                    //                                .body span {
+                    //                                  color: #c89328;
+                    //                                }
+                    //                              </style>
+                    //                              <body>
+                    //                                <div class=""header"">
+                    //                                  <img
+                    //                                    src="" https://www.alfardanoysterprivilegeclub.com/assets/img/AOPC-Black.png""
+                    //                                    alt=""Alfardan Oyster Privilege Club""
+                    //                                    width=""100%""
+                    //                                  />
+                    //                                </div>
+                    //                                <div class=""body"">
+                    //                                  <p class=citation>Dear <span> Team, </span></p>
+                    //                                  <p class=body>" +
+                    //                                  data.Message+
+
+                    //                                " </div> <p class=footer>Regards, <br />" +
+                    //                                 " <br /> " +
+                    //                                 "<p class=footer>Employee ID: " + data.EmployeeID + " </p> " +
+                    //                                  "<p class=footer>Full Name: " + fullname + " </p> " +
+                    //                                   "<p class=footer>Contact Number: " + dt.Rows[0]["Email"].ToString() + " </p>" +
+                    //                                    "<p class=footer>Corporate Name: " + dt.Rows[0]["CorporateName"].ToString() + " </p>" +
+                    //                                     "<p class=footer>Position: " + dt.Rows[0]["Name"].ToString() + " </p>" +
 
 
-    "<p class=footer > Alfardan Oyster Privilege Club App   </p>" +
-     "</body>";
+                    //                                "<p class=footer > Alfardan Oyster Privilege Club App   </p>" +
+                    //                                 "</body>";
+                    bodyBuilder.HtmlBody = @" <body>
+                                                   <div class='container-holder' style='font-size:16px;font-family:Helvetica,sans-serif;margin:0;padding:100px 0;line-height:1.3;background-image:url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);background-repeat:no-repeat;background-size:cover;display: flex;justify-content:center;align-items:center;'>
+                                                        <div class='container' style='font-size:16px;font-family:Helvetica,sans-serif;background-color:white;margin: 30%;border-radius:15px;padding:24px;box-sizing:border-box;'>
+                                                        <div class='logo-holder' style='justify-content: center;'>
+                                                             <img style='margin-left: 25%' src='https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg' alt='Alfardan Oyster Privilege Club' width='50%' />
+                                                             </div>
+                                                                 </br>
+                                                               <p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>
+                                                                    Dear Team,</p>
+                                                               <p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>"+data.Message+"</br></br>Regards,</p>"+
+          
+				                                                "<p class=footer>Employee ID: " + data.EmployeeID + " </p> " +
+                                                                "<p class=footer>Full Name: " + fullname + " </p> " +
+                                                                "<p class=footer>Contact Number: " + dt.Rows[0]["Email"].ToString() + " </p>" +
+                                                                "<p class=footer>Corporate Name: " + dt.Rows[0]["CorporateName"].ToString() + " </p>" +
+                                                                "<p class=footer>Position: " + dt.Rows[0]["Name"].ToString() + " </p>" +
+                                                                "<p class=footer > Alfardan Oyster Privilege Club App   </p>" +
+          
+                                                        "</div> " +
+                                                    "</div> " +
+                                                 "</body>";
+                    var message2 = new MimeMessage();
+                    message2.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
+
+                    message2.To.Add(new MailboxAddress(fullname, dt.Rows[0]["Email"].ToString()));
+                    //message2.ReplyTo.Add(new MailboxAddress(fullname, dt.Rows[0]["Email"].ToString()));
+                    message2.Subject = "AOPC Support Concern";
+                    var bodyBuilder2 = new BodyBuilder();
+                    bodyBuilder2.HtmlBody = @"<body>
+                                        <div class='container-holder' style='font-size:16px;font-family:Helvetica,sans-serif;margin:0;padding:100px 0;line-height:1.3;background-image:url(https://www.alfardanoysterprivilegeclub.com/build/assets/black-cover-pattern-f558a9d0.jpg);background-repeat:no-repeat;background-size:cover;display: flex;justify-content:center;align-items:center;'>
+                                        <div class='container' style='font-size:16px;font-family:Helvetica,sans-serif;background-color:white;margin: 30%;border-radius:15px;padding:24px;box-sizing:border-box;'>
+                                            <div class='logo-holder' style='justify-content: center;'>
+                                            <img style='margin-left: 25%' src='https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg' alt='Alfardan Oyster Privilege Club' width='50%' />
+                                            </div>
+                                            </br>
+                                            <p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>Hi <strong>" + fullname + "</strong>,</p>"
+                                            + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>I hope this message finds you well. </br>"
+                                            + "</br> Kindly note our team is currently reviewing your request, and we will provide further updates as soon as possible.</p>"
+                                            + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>If you have any additional details to share or require further assistance, please don’t hesitate to reach out at <a href='mailto:afpmarketing@alfardan.com.qa'>afpmarketing@alfardan.com.qa</a>. </p>"
+                                            + "<p style='font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;'>Thank you</p>"
+                                        + "</div>"
+                                        + "</div>"
+                                    + "</body>";
                     string query = "";
                     query = $@"insert into tbl_SupportModel (EmployeeID,Message,Status,DateCreated) values ('" + data.EmployeeID + "','" + data.Message + "','14','"+DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")+"')";
                     db.AUIDB_WithParam(query);
                     result.Status = "New Support Inserted";
                     message.Body = bodyBuilder.ToMessageBody();
+                    message2.Body = bodyBuilder2.ToMessageBody();
                     using (var client = new SmtpClient())
                     {
-                        client.Connect("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                        client.Authenticate("app@alfardan.com.qa", "Oyster2023!");
-                        client.Send(message);
-                        client.Disconnect(true);
+                        await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                        await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                        await client.SendAsync(message);
+                        await client.SendAsync(message2);
+                        await client.DisconnectAsync(true);
 
                     }
 
-                
-                return Ok(result);
+
+
+                    return Ok(result);
                 }
             }
             catch (Exception ex)
@@ -542,7 +615,7 @@ namespace AuthSystem.Data.Controller
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("app@alfardan.com.qa", "Oyster2023!");
+                await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
                     

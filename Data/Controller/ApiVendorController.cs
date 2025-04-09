@@ -522,14 +522,14 @@ FROM            tbl_VendorModel INNER JOIN
 
                 
                 string sql_user = $@"select 
-	                                    v.*
+	                                    offe.*
                                     from tbl_VendorModel v with(nolock)
                                     left join tbl_offeringmodel offe with(nolock)
-                                    on offe.vendorid = v.id
+                                    on offe.vendorid = v.id and offe.StatusID = 5
                                     left join tbl_privilegemodel pm with(nolock)
-                                    on pm.vendorid = v.id
+                                    on pm.vendorid = v.id  and pm.Active = 5
 
-                                    where v.Status = 5
+                                    where v.Status = 5 
                                     and
                                     (offe.id is not null
                                     or pm.id is not null)

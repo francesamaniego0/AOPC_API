@@ -460,7 +460,7 @@ namespace API.Data.Controller
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("app@alfardan.com.qa", "Oyster2023!");
+                await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
 
@@ -550,7 +550,7 @@ namespace API.Data.Controller
                 using (var client = new SmtpClient())
                 {
                     await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("app@alfardan.com.qa", "Oyster2023!");
+                    await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
 
@@ -652,6 +652,6 @@ namespace API.Data.Controller
 
             return Ok(result);
         }
-
+        
     }
 }

@@ -393,7 +393,7 @@ WHERE        (UsersModel.Active IN (1, 2, 9, 10)) AND (UsersModel.Type = 2)";
         {
             string sql = $@"SELECT EmployeeId,CompanyID from UsersModel 
 left join tbl_CorporateModel on CorporateID = tbl_CorporateModel.Id
-where tbl_CorporateModel.CorporateName =  '" + company + "'";
+where tbl_CorporateModel.CorporateName =  '" + company + "' and active = 1";
             var result = new List<CorporateNotificationData>();
             DataTable table = db.SelectDb(sql).Tables[0];
             foreach (DataRow dr in table.Rows)
