@@ -12,6 +12,7 @@ using static AuthSystem.Data.Controller.ApiPaginationController;
 using MimeKit;
 using MailKit.Net.Smtp;
 using static AuthSystem.Data.Controller.ApiUserAcessController;
+using System.Collections.Generic;
 
 namespace API.Data.Controller
 {
@@ -215,11 +216,11 @@ namespace API.Data.Controller
             string sql;
             if (data.name == null)
             {
-                sql = $@"select Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '6'";
+                sql = $@"select id, Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '2'";
             }
             else
             {
-                sql = $@"select Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '6' and  CorporateId = '" + data.name + "'";
+                sql = $@"select id, Coalesce(Fullname, Concat (Fname + ' ',Lname)) Name,Email from UsersModel where Active = '2' and  CorporateId = '" + data.name + "'";
             }
             DataTable dt = db.SelectDb(sql).Tables[0];
             var result = new List<UnregisteredResult>();
@@ -227,6 +228,7 @@ namespace API.Data.Controller
             {
 
                 var item = new UnregisteredResult();
+                item.id = dr["id"].ToString();
                 item.Name = dr["Name"].ToString();
                 item.Email = dr["Email"].ToString();
                 item.Count = dt.Rows.Count;
@@ -261,6 +263,7 @@ namespace API.Data.Controller
         }
         public class UnregisteredResult
         {
+            public string id { get; set; }
             public string Name { get; set; }
             public string Email { get; set; }
 
@@ -270,6 +273,7 @@ namespace API.Data.Controller
         public class UnregisteredUserEmailRequest
         {
             public string Body { get; set; }
+            public string[] Id { get; set; }
             public string[] Name { get; set; }
             public string[] Email { get; set; }
             //public List<UserListModel> UserList { get; set; }
@@ -283,8 +287,17 @@ namespace API.Data.Controller
         [HttpPost]
         public async Task<IActionResult> EmailUnregisterUserv2(UnregisteredUserEmailRequest data)
         {
-            Console.Write(data.Name.Count());
-
+            //Console.Write(data.Name.Count());
+            for (int i = 0; i < data.Id.Length; i++)
+            {
+                string sql = $@"select * from usersmodel where Id='" + data.Id[i] + "'";
+                DataTable dt = db.SelectDb(sql).Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    string query = $@"update  UsersModel set Active='9' where  Id='" + data.Id[i] + "'";
+                    db.AUIDB_WithParam(query);
+                }
+            }
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("ALFARDAN OYSTER PRIVILEGE CLUB", "app@alfardan.com.qa"));
             //for (int x = 0; x < data.Name.Length; x++)
@@ -397,70 +410,22 @@ namespace API.Data.Controller
 
 
 
-            //bodyBuilder.HtmlBody = @" <style>
-            //    body {
-            //      margin: 0;
-            //      box-sizing: border-box;
-            //      display: flex;
-            //      flex-direction: column;
-            //      font-family: ""Montserrat"";
-            //    }
-            //    @font-face {
-            //      font-family: ""Montserrat"";
-            //      src: url(""https://www.alfardanoysterprivilegeclub.com/build/assets/Montserrat-Regular-dcfe8df2.ttf"");
-            //    }
-            //    .header {
-            //      width: 200px;
-            //      height: 120px;
-            //      overflow: hidden;
-            //      margin: 50px auto;
-            //    }
-            //    .body {
-            //      width: 500px;
-            //      margin: 5px auto;
-            //      font-size: 13px;
-            //    }
-            //    .body p {
-            //      margin: 20px 0;
-            //    }
-            //    ul li {
-            //      list-style: none;
-            //    }
-            //    .footer {
-            //      width: 500px;
-            //      margin: 20px auto;
-            //      font-size: 13px;
-            //    }
-            //    .citation span {
-            //      color: #c89328;
-            //    }
-            //    .body span {
-            //      color: #c89328;
-            //    }
-            //  </style>
-            //  <body>
-            //    <div class=""header"">
-            //      <img
-            //        src=""https://cms.alfardanoysterprivilegeclub.com/img/AOPCBlack.jpg""
-
-            //        alt=""Alfardan Oyster Privilege Club""
-            //        width=""100%""
-            //      />
-            //    </div>
-            //    <div class=""body"">
-            //      <p class=citation>Dear <span> Admin </span></p>
-            //      <p class=body>
-            //         " + data.Body + " </span>.</p><p class=body> " +
-            //" </div> <p class=footer>Regards, <br />" +
-            // " <br /> " +
-            // "Alfardan Oyster Privilege Club App " +
-            // "</p>" +
-            // "</body>";
+            
             message.Body = bodyBuilder.ToMessageBody();
+            string emailcred = "";
+            string passwordcred = "";
+            string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+            DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+            foreach (DataRow dr in getmaildt.Rows)
+            {
+                emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+            }
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                await client.AuthenticateAsync(emailcred, passwordcred);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
 
@@ -547,10 +512,20 @@ namespace API.Data.Controller
                  "</p>" +
                  "</body>";
                 message.Body = bodyBuilder.ToMessageBody();
+                string emailcred = "";
+                string passwordcred = "";
+                string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+                DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+                foreach (DataRow dr in getmaildt.Rows)
+                {
+                    emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                    passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+                }
                 using (var client = new SmtpClient())
                 {
                     await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                    await client.AuthenticateAsync(emailcred, passwordcred);
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
 

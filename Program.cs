@@ -1,3 +1,4 @@
+using API.Models;
 using AuthSystem;
 using AuthSystem.Manager;
 using AuthSystem.Models;
@@ -64,7 +65,14 @@ builder.Services.AddControllers();
 
 ////builder.Services.AddSwaggerGen(s =>
 //{
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(365); // Long timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 
 builder.Services.AddSwaggerGen(s =>
@@ -112,7 +120,10 @@ options.AddPolicy("ApiKey",
 builder.Services.AddSingleton<JwtAuthenticationManager>();
 
 var app = builder.Build();
-
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax,
+});
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -137,6 +148,7 @@ app.UseCors(builder =>
 });
 app.UseHttpsRedirection();
 
+app.UseSession();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

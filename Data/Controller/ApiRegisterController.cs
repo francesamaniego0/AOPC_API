@@ -1105,7 +1105,7 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                         {
 
                             query += $@"insert into UsersModel (Username,Fullname,Fname,Lname,Email,Gender,CorporateID,PositionID,JWToken,FilePath,Active,Cno,isVIP,Address,Type,EmployeeID,DateCreated) values
-                                     ('" + data.Username + "','" + fullname + "','" + data.Fname + "','" + data.Lname + "','" + data.Email + "','" + data.Gender + "','" + data.CorporateID + "','" + data.PositionID + "','" + string.Concat(strtokenresult.TakeLast(15)) + "','" + filepath + "','" + data.Active + "','" + data.Cno + "','" + data.isVIP + "','N/A','" + data.Type + "','" + data.EmployeeID + "','" + DateTime.Now.ToString("yyyy-MM-dd") + "')";
+                                     ('" + data.Username.Trim() + "','" + fullname.Trim() + "','" + data.Fname.Trim() + "','" + data.Lname.Trim() + "','" + data.Email.Trim() + "','" + data.Gender + "','" + data.CorporateID + "','" + data.PositionID + "','" + string.Concat(strtokenresult.TakeLast(15)) + "','" + filepath + "','" + data.Active + "','" + data.Cno + "','" + data.isVIP + "','N/A','" + data.Type + "','" + data.EmployeeID.Trim() + "','" + DateTime.Now.ToString("yyyy-MM-dd") + "')";
                             db.AUIDB_WithParam(query);
 
                             string getlastinserted = $@"select Top(1) * from UsersModel order by id desc";
@@ -1280,10 +1280,22 @@ WHERE        (UsersModel.Active IN (1, 2, 9,10)) AND (UsersModel.Type = 3) order
                                                   + "</div> "
                                                 + "</body> "; 
                 message.Body = bodyBuilder.ToMessageBody();
+
+                string emailcred = "";
+                string passwordcred = "";
+                string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+                DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+                foreach (DataRow dr in getmaildt.Rows)
+                {
+                    emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                    passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+                }
+
                 using (var client = new SmtpClient())
                 {
                     await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                    await client.AuthenticateAsync(emailcred, passwordcred);
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
                 }

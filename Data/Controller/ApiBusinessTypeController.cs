@@ -15,6 +15,7 @@ using AuthSystem.Data;
 using AuthSystem.Data.Class;
 using AuthSystem.ViewModel;
 using static AuthSystem.Data.Controller.ApiVendorController;
+using API.Models;
 
 namespace AuthSystem.Data.Controller
 {
@@ -31,6 +32,7 @@ namespace AuthSystem.Data.Controller
         private ApiGlobalModel _global = new ApiGlobalModel();
         private readonly JwtAuthenticationManager jwtAuthenticationManager;
 
+        //private readonly GlobalState _state;
 
         public ApiBusinessTypeController(IOptions<AppSettings> appSettings, ApplicationDbContext context, JwtAuthenticationManager jwtAuthenticationManager)
         {
@@ -38,19 +40,54 @@ namespace AuthSystem.Data.Controller
             _context = context;
             _appSettings = appSettings.Value;
             this.jwtAuthenticationManager = jwtAuthenticationManager;
-   
         }
       
         [HttpGet]
         public async Task<IActionResult> BusinessTypeList()
         {
-            string sql = $@"SELECT        tbl_BusinessTypeModel.Id, tbl_BusinessTypeModel.BusinessTypeName, tbl_BusinessTypeModel.Description, tbl_BusinessTypeModel.DateCreated, tbl_BusinessTypeModel.BusinessTypeID, 
-                         tbl_BusinessTypeModel.PromoText, tbl_StatusModel.Name AS Status, tbl_BusinessTypeModel.ImgURL, tbl_BusinessTypeModel.isVIP, tbl_StatusModel.Id AS Status
-FROM            tbl_BusinessTypeModel INNER JOIN
-                         tbl_StatusModel ON tbl_BusinessTypeModel.Status = tbl_StatusModel.Id
-WHERE        (tbl_BusinessTypeModel.Status = 5)
-ORDER BY tbl_BusinessTypeModel.Id DESC";
-     
+            //var CorporateId = _state.CorporateValue;
+            var CorporateId = HttpContext.Session.GetString("BTCorporateId");
+            var UserType = HttpContext.Session.GetString("BTUserType");
+            string sql = "";
+            //Console.WriteLine(CorporateId);
+            if (UserType == "ADMIN")
+            {
+                sql = $@"SELECT        tbl_BusinessTypeModel.Id, tbl_BusinessTypeModel.BusinessTypeName, tbl_BusinessTypeModel.Description, tbl_BusinessTypeModel.DateCreated, tbl_BusinessTypeModel.BusinessTypeID, 
+                                     tbl_BusinessTypeModel.PromoText, tbl_StatusModel.Name AS Status, tbl_BusinessTypeModel.ImgURL, tbl_BusinessTypeModel.isVIP, tbl_StatusModel.Id AS Status
+            FROM            tbl_BusinessTypeModel INNER JOIN
+                                     tbl_StatusModel ON tbl_BusinessTypeModel.Status = tbl_StatusModel.Id
+            WHERE        (tbl_BusinessTypeModel.Status = 5)
+            ORDER BY tbl_BusinessTypeModel.Id DESC";
+            }
+            else
+            {
+                if(CorporateId == null)
+                {
+                    return Problem("You need to login First");
+                }
+                sql = $@"SELECT bt.Id, bt.BusinessTypeName, bt.Description, bt.DateCreated, bt.BusinessTypeID, bt.PromoText, sm.Name AS Status, bt.ImgURL, bt.isVIP, sm.Id AS Status
+                                    FROM tbl_BusinessTypeModel  bt
+                                    INNER JOIN tbl_StatusModel sm
+                                    ON bt.Status = sm.Id
+
+                                    LEFT JOIN tbl_PrivilegeModel AS pm
+                                    ON pm.BusinessTypeID = bt.Id
+                                    LEFT JOIN tbl_CorporatePrivilegeTierModel as cptm
+                                    ON cptm.PrivilegeID = pm.Id
+
+                                    WHERE (bt.Status = 5) AND cptm.CorporateID =" + CorporateId
+                         + "GROUP BY bt.Id, bt.BusinessTypeName, bt.Description, bt.DateCreated, bt.BusinessTypeID, bt.PromoText, sm.Name , bt.ImgURL, bt.isVIP, sm.Id"
+                       + " ORDER BY bt.Id DESC";
+
+            }
+
+            //            sql = $@"SELECT        tbl_BusinessTypeModel.Id, tbl_BusinessTypeModel.BusinessTypeName, tbl_BusinessTypeModel.Description, tbl_BusinessTypeModel.DateCreated, tbl_BusinessTypeModel.BusinessTypeID, 
+            //                         tbl_BusinessTypeModel.PromoText, tbl_StatusModel.Name AS Status, tbl_BusinessTypeModel.ImgURL, tbl_BusinessTypeModel.isVIP, tbl_StatusModel.Id AS Status
+            //FROM            tbl_BusinessTypeModel INNER JOIN
+            //                         tbl_StatusModel ON tbl_BusinessTypeModel.Status = tbl_StatusModel.Id
+            //WHERE        (tbl_BusinessTypeModel.Status = 5)
+            //ORDER BY tbl_BusinessTypeModel.Id DESC";
+
             DataTable table = db.SelectDb(sql).Tables[0];
             var result = new List<BusinessTypeVM>();
             foreach (DataRow dr in table.Rows)
@@ -70,7 +107,94 @@ ORDER BY tbl_BusinessTypeModel.Id DESC";
 
             return Ok(result);
         }
+        public class filterByCorporate
+        {
+            public string CorporateId { get; set; }
+        }
+        [HttpPost]
+        public async Task<IActionResult> BusinessTypeListv3(filterByCorporate data)
+        {
 
+            string sql = "";
+            if (data.CorporateId == null || data.CorporateId == "")
+            {
+
+                sql = $@"SELECT        tbl_BusinessTypeModel.Id, tbl_BusinessTypeModel.BusinessTypeName, tbl_BusinessTypeModel.Description, tbl_BusinessTypeModel.DateCreated, tbl_BusinessTypeModel.BusinessTypeID, 
+                                     tbl_BusinessTypeModel.PromoText, tbl_StatusModel.Name AS Status, tbl_BusinessTypeModel.ImgURL, tbl_BusinessTypeModel.isVIP, tbl_StatusModel.Id AS Status
+            FROM            tbl_BusinessTypeModel INNER JOIN
+                                     tbl_StatusModel ON tbl_BusinessTypeModel.Status = tbl_StatusModel.Id
+            WHERE        (tbl_BusinessTypeModel.Status = 5)
+            ORDER BY tbl_BusinessTypeModel.Id DESC";
+            }
+            else
+            {
+                sql = $@"SELECT bt.Id, bt.BusinessTypeName, bt.Description, bt.DateCreated, bt.BusinessTypeID, bt.PromoText, sm.Name AS Status, bt.ImgURL, bt.isVIP, sm.Id AS Status
+                                    FROM tbl_BusinessTypeModel  bt
+                                    INNER JOIN tbl_StatusModel sm
+                                    ON bt.Status = sm.Id
+
+                                    LEFT JOIN tbl_PrivilegeModel AS pm
+                                    ON pm.BusinessTypeID = bt.Id
+                                    LEFT JOIN tbl_CorporatePrivilegeTierModel as cptm
+                                    ON cptm.PrivilegeID = pm.Id
+
+                                    WHERE (bt.Status = 5) AND cptm.CorporateID =" + data.CorporateId
+                                         + "GROUP BY bt.Id, bt.BusinessTypeName, bt.Description, bt.DateCreated, bt.BusinessTypeID, bt.PromoText, sm.Name , bt.ImgURL, bt.isVIP, sm.Id"
+                                       + " ORDER BY bt.Id DESC";
+            }
+                
+
+            DataTable table = db.SelectDb(sql).Tables[0];
+            var result = new List<BusinessTypeVM>();
+            foreach (DataRow dr in table.Rows)
+            {
+                var item = new BusinessTypeVM();
+                item.Id = int.Parse(dr["Id"].ToString());
+                item.BusinessTypeName = dr["BusinessTypeName"].ToString();
+                item.Description = dr["Description"].ToString();
+                item.DateCreated = Convert.ToDateTime(dr["DateCreated"].ToString()).ToString("MM/dd/yyyy");
+                item.status = dr["status"].ToString();
+                item.BusinessTypeID = dr["BusinessTypeID"].ToString();
+                item.PromoText = dr["PromoText"].ToString();
+                item.ImgURL = dr["ImgURL"].ToString();
+                item.isVIP = dr["isVIP"].ToString();
+                result.Add(item);
+            }
+
+            return Ok(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> BusinessTypeListv2()
+        {
+            
+            string sql = "";
+            
+            sql = $@"SELECT        tbl_BusinessTypeModel.Id, tbl_BusinessTypeModel.BusinessTypeName, tbl_BusinessTypeModel.Description, tbl_BusinessTypeModel.DateCreated, tbl_BusinessTypeModel.BusinessTypeID, 
+                                     tbl_BusinessTypeModel.PromoText, tbl_StatusModel.Name AS Status, tbl_BusinessTypeModel.ImgURL, tbl_BusinessTypeModel.isVIP, tbl_StatusModel.Id AS Status
+            FROM            tbl_BusinessTypeModel INNER JOIN
+                                     tbl_StatusModel ON tbl_BusinessTypeModel.Status = tbl_StatusModel.Id
+            WHERE        (tbl_BusinessTypeModel.Status = 5)
+            ORDER BY tbl_BusinessTypeModel.Id DESC";
+
+            DataTable table = db.SelectDb(sql).Tables[0];
+            var result = new List<BusinessTypeVM>();
+            foreach (DataRow dr in table.Rows)
+            {
+                var item = new BusinessTypeVM();
+                item.Id = int.Parse(dr["Id"].ToString());
+                item.BusinessTypeName = dr["BusinessTypeName"].ToString();
+                item.Description = dr["Description"].ToString();
+                item.DateCreated = Convert.ToDateTime(dr["DateCreated"].ToString()).ToString("MM/dd/yyyy");
+                item.status = dr["status"].ToString();
+                item.BusinessTypeID = dr["BusinessTypeID"].ToString();
+                item.PromoText = dr["PromoText"].ToString();
+                item.ImgURL = dr["ImgURL"].ToString();
+                item.isVIP = dr["isVIP"].ToString();
+                result.Add(item);
+            }
+
+            return Ok(result);
+        }
         [HttpPost]
         public async  Task<IActionResult> SaveBusinessType(BusinessTypeModel data)
         {
@@ -155,7 +279,6 @@ ORDER BY tbl_BusinessTypeModel.Id DESC";
        
         public class DeleteBtype
         {
-
             public int Id { get; set; }
         }
         public class Registerstats

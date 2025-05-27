@@ -874,13 +874,24 @@ namespace AuthSystem.Data.Controller
                                         + "</div>"
                                     + "</body>"; 
             message.Body = bodyBuilder.ToMessageBody();
+
+            string emailcred = "";
+            string passwordcred = "";
+            string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+            DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+            foreach (DataRow dr in getmaildt.Rows)
+            {
+                emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+            }
+
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                await client.AuthenticateAsync(emailcred, passwordcred);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
-
             }
             return Ok();
         }
@@ -993,7 +1004,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-	                        left join tbl_VendorModel as vend
+	                        inner join tbl_VendorModel as vend
 		                        on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='Food & Beverage' and  CONVERT(DATE,tbl_audittrailModel.DateCreated) >= CONVERT(DATE,DATEADD(day,-" + day + ", GETDATE())) " +
                             "GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1007,7 +1018,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-	                        left join tbl_VendorModel as vend
+	                        inner join tbl_VendorModel as vend
 		                        on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='Food & Beverage' AND tbl_audittrailModel.DateCreated between '" + data.startdate + "' AND '" + data.enddate +
                             "' GROUP BY Business,Actions,Module, vend.Address order by count desc";
@@ -1088,7 +1099,7 @@ namespace AuthSystem.Data.Controller
                             ,Module
                             ,vend.Address
                         FROM tbl_audittrailModel  
-                        left join tbl_VendorModel as vend
+                        inner join tbl_VendorModel as vend
 	                        on vend.VendorName = business and vend.Status = '5'
                         WHERE Actions LIKE '%Viewed%' and module ='Wellness' and  CONVERT(DATE,tbl_audittrailModel.DateCreated) >= CONVERT(DATE,DATEADD(day,-" + day + ", GETDATE())) " +
                         "GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1102,7 +1113,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='Wellness' and  tbl_audittrailModel.DateCreated between '" + data.startdate + "' and '" + data.enddate +
                             "' GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1183,7 +1194,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='news' and  CONVERT(DATE,tbl_audittrailModel.DateCreated) >= CONVERT(DATE,DATEADD(day,-" + day + ", GETDATE())) " +
                             "GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1197,7 +1208,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5'
                         WHERE Actions LIKE '%Viewed%' and module ='news' and  tbl_audittrailModel.DateCreated between '" + data.startdate + "' and '" + data.enddate +
                         "' GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1557,7 +1568,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5' 
                             WHERE Actions LIKE '%Viewed%' and module ='Rooms & Suites' and  CONVERT(DATE,tbl_audittrailModel.DateCreated) >= CONVERT(DATE,DATEADD(day,-" + day + ", GETDATE())) " +
                             "GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1571,7 +1582,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='Rooms & Suites' and  tbl_audittrailModel.DateCreated between '" + data.startdate + "' and '" + data.enddate +
                             "' GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1653,7 +1664,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5'
                             WHERE Actions LIKE '%Viewed%' and module ='Shops & Services' and  CONVERT(DATE,tbl_audittrailModel.DateCreated) >= CONVERT(DATE,DATEADD(day,-" + day + ", GETDATE())) " +
                             "GROUP BY    Business,Actions,Module, vend.Address order by count desc";
@@ -1667,7 +1678,7 @@ namespace AuthSystem.Data.Controller
                                 ,Module
                                 ,vend.Address
                             FROM tbl_audittrailModel  
-                            left join tbl_VendorModel as vend
+                            inner join tbl_VendorModel as vend
 	                            on vend.VendorName = business and vend.Status = '5' 
                             WHERE Actions LIKE '%View%' and module ='Shops & Services' and  tbl_audittrailModel.DateCreated between '" + data.startdate + "' and '" + data.enddate +
                             "' GROUP BY    Business,Actions,Module, vend.Address order by count desc";

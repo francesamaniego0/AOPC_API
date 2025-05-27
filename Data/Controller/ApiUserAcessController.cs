@@ -177,14 +177,23 @@ namespace AuthSystem.Data.Controller
                                             + "</div> "
                                          + "</body>";
                 message.Body = bodyBuilder.ToMessageBody();
+                string emailcred = "";
+                string passwordcred = "";
+                string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+                DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+                foreach (DataRow dr in getmaildt.Rows)
+                {
+                    emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                    passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+                }
+
                 using (var client = new SmtpClient())
                 {
-                    client.Connect("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    client.Authenticate("app@alfardan.com.qa", "0!S+Er-@Pp");
-                    client.Send(message);
-                    client.Disconnect(true);
-                    status = "Successfully sent registration email";
-
+                    await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync(emailcred, passwordcred);
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
                 }
                 result.Status = "Success!";
                 return Ok(result);
@@ -366,10 +375,21 @@ namespace AuthSystem.Data.Controller
                     result.Status = "New Support Inserted";
                     message.Body = bodyBuilder.ToMessageBody();
                     message2.Body = bodyBuilder2.ToMessageBody();
+
+                    string emailcred = "";
+                    string passwordcred = "";
+                    string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+                    DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+                    foreach (DataRow dr in getmaildt.Rows)
+                    {
+                        emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                        passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+                    }
                     using (var client = new SmtpClient())
                     {
                         await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                        await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                        await client.AuthenticateAsync(emailcred, passwordcred);
                         await client.SendAsync(message);
                         await client.SendAsync(message2);
                         await client.DisconnectAsync(true);
@@ -612,10 +632,20 @@ namespace AuthSystem.Data.Controller
  "</p>" +
  "</body>";
             message.Body = bodyBuilder.ToMessageBody();
+            string emailcred = "";
+            string passwordcred = "";
+            string getEmailCredsSQL = $@"SELECT [Email], [Password] FROM [AOPCDB].[dbo].[Tbl_EncryptedEmail] WHERE isSender = 1 and isDeleted = 0";
+            DataTable getmaildt = db.SelectDb(getEmailCredsSQL).Tables[0];
+
+            foreach (DataRow dr in getmaildt.Rows)
+            {
+                emailcred = Cryptography.Decrypt(dr["Email"].ToString());
+                passwordcred = Cryptography.Decrypt(dr["Password"].ToString());
+            }
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.office365.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("app@alfardan.com.qa", "0!S+Er-@Pp");
+                await client.AuthenticateAsync(emailcred, passwordcred);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
                     
@@ -688,6 +718,7 @@ namespace AuthSystem.Data.Controller
                 item.Gender = table.Rows[0]["Gender"].ToString();
                 item.EmployeeID = table.Rows[0]["EmployeeID"].ToString();
                 item.isVIP = table.Rows[0]["isVIP"].ToString();
+                item.CorporateId = table.Rows[0]["CorporateID"].ToString();
                 item.Corporatename = table.Rows[0]["Corporatename"].ToString();
                 item.PositionName = table.Rows[0]["PositionName"].ToString();
                 item.UserType = table.Rows[0]["UserType"].ToString();

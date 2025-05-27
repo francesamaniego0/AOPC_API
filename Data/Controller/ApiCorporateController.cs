@@ -317,12 +317,18 @@ WHERE        (tbl_CorporateModel.Status = 1) order by tbl_CorporateModel.Id desc
                                       ,[VipCount]
                                   FROM [dbo].[tbl_MembershipPrivilegeModel] where MembershipID='"+ data.MembershipID + "'";
                         DataTable dt = db.SelectDb(sql).Tables[0];
-                        string sql_corpid = $@"SELECT top(1) [Id]
-                                      ,[PrivilegeID]
-                                      ,[MembershipID]
-                                      ,[Count]
-                                      ,[VipCount]
-                                  FROM [dbo].[tbl_MembershipPrivilegeModel] order by id desc";
+                        //string sql_corpid = $@"SELECT top(1) [Id]
+                        //              ,[PrivilegeID]
+                        //              ,[MembershipID]
+                        //              ,[Count]
+                        //              ,[VipCount]
+                        //          FROM [dbo].[tbl_MembershipPrivilegeModel] order by id desc";
+                        //DataTable dt_corpid = db.SelectDb(sql_corpid).Tables[0];
+                        //string delete = $@"delete tbl_CorporatePrivilegeTierModel where CorporateID='" + dt_corpid.Rows[0]["Id"].ToString() + "'";
+
+
+
+                        string sql_corpid = $@"SELECT TOP (1) [Id],[CorporateName] FROM [AOPCDB].[dbo].[tbl_CorporateModel] order by id desc";
                         DataTable dt_corpid = db.SelectDb(sql_corpid).Tables[0];
                         string delete = $@"delete tbl_CorporatePrivilegeTierModel where CorporateID='" + dt_corpid.Rows[0]["Id"].ToString() + "'";
                         db.AUIDB_WithParam(delete);

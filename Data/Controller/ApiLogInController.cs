@@ -24,6 +24,7 @@ using System.Security.Cryptography;
 using System.Text;
 using API.Models;
 using CMS.Models;
+using System.Net.NetworkInformation;
 
 namespace AuthSystem.Data.Controller
 {
@@ -39,7 +40,6 @@ namespace AuthSystem.Data.Controller
         //private ApiGlobalModel _global = new ApiGlobalModel();
         private readonly JwtAuthenticationManager jwtAuthenticationManager;
 
-
         public ApiLogInController(IOptions<AppSettings> appSettings, ApplicationDbContext context, JwtAuthenticationManager jwtAuthenticationManager)
         {
 
@@ -50,22 +50,32 @@ namespace AuthSystem.Data.Controller
         }
 
         [HttpPost]
-
         public IActionResult LogIn (UserModel data)
         {
-            var pass3 = Cryptography.Decrypt("eomUOZIK5B4GM7T9HKSucNiBk9Yb0PzwFXxHClG80Ag=");
-            //Console.WriteLine(pass3);
+            var pass3 = Cryptography.Decrypt("cPnBpX9fadVSakJzno5TASOU3vRs0HU7Q3XaoRNY1tY=");
+            Console.WriteLine(pass3);
             string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             //_global.Status = gv.ValidationUser(data.Username, data.Password, _context);
             bool compr_user = false;
             //var userinfo = dbContext.tbl_UsersModel.Where(a => EF.Functions.Collate(a.Username, "Latin1_General_CI_AI") == username).ToList();
-            string sql = $@"SELECT        UsersModel.Id, UsersModel.Username, UsersModel.Password, UsersModel.Fname,UsersModel.Lname, UsersModel.EmployeeID,UsersModel.Active, tbl_UserTypeModel.UserType, tbl_CorporateModel.CorporateName, tbl_PositionModel.Name as PositionName, UsersModel.JWToken,UsersModel.FilePath
+            string sql = $@"SELECT        UsersModel.Id, UsersModel.Username, UsersModel.Password, UsersModel.Fname,UsersModel.Lname, UsersModel.EmployeeID,UsersModel.Active, tbl_UserTypeModel.UserType, tbl_CorporateModel.Id AS 'CorporateId', tbl_CorporateModel.CorporateName, tbl_PositionModel.Name as PositionName, UsersModel.JWToken,UsersModel.FilePath
                         FROM            UsersModel INNER JOIN
                                                  tbl_UserTypeModel ON UsersModel.Type = tbl_UserTypeModel.Id INNER JOIN
                                                  tbl_CorporateModel ON UsersModel.CorporateID = tbl_CorporateModel.Id INNER JOIN
                                                  tbl_PositionModel ON UsersModel.PositionID = tbl_PositionModel.Id
                         WHERE        (UsersModel.Username = '" + data.Username + "' COLLATE Latin1_General_CS_AS) AND (UsersModel.Password = '" + Cryptography.Encrypt(data.Password) + "' COLLATE Latin1_General_CS_AS) AND (UsersModel.Active = 1)";
+            
+            
             DataTable dt = db.SelectDb(sql).Tables[0];
+            var corporate = dt.Rows[0]["CorporateId"].ToString();
+            var usertype = dt.Rows[0]["UserType"].ToString();
+            HttpContext.Session.SetString("BTCorporateId", corporate);
+            HttpContext.Session.SetString("BTUserType", usertype);
+            var CorporateId = HttpContext.Session.GetString("BTCorporateId");
+            var UserType = HttpContext.Session.GetString("BTUserType");
+            Console.WriteLine(CorporateId);
+            Console.WriteLine(UserType);
+            //_state.SomeGlobalValue = dt.Rows[0]["CorporateId"].ToString(); // Example value
             var item = new AppModel();
             if (data.Username.Length != 0 || data.Password.Length != 0)
             {

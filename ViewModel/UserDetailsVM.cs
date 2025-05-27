@@ -24,6 +24,8 @@ namespace AuthSystem.ViewModel
 
         public string PositionName { get; set; }
 
+        public string CorporateId { get; set; }
+
         public string Corporatename { get; set; }
 
         public string UserType { get; set; }
